@@ -130,7 +130,7 @@ const paginas = {
     document.title = `${p.titulo} | Milu & Me`;
     const promoBox = n
       ? `<div class="promo-box"><b>Entre más cajones, más ahorras</b><span>2 cajones −5 % · 3 cajones −8 % · 4 cajones −10 %</span><a href="promociones.html">Ver promociones</a></div>`
-      : `<div class="promo-box"><b>${temp ? `🎉 Precio de ${temp.nombre}` : "¿Son hermanos?"}</b><span>${temp ? "Solo por unos días." : `La 2ª torre tiene 10 % menos (2 torres: ${dinero(t2Torres())}).`}</span><a href="promociones.html#familias">Ver promociones</a></div>`;
+      : `<div class="promo-box"><b>${temp ? `🎉 Precio de ${temp.nombre}` : "¿Son hermanos?"}</b><span>${temp ? "Solo por unos días." : `La 2ª torre tiene 10 % menos (2 torres: ${dinero(t2Torres())}).`}</span><a href="promo-escalera.html">Ver promociones</a></div>`;
     const fav = favs.tiene(p.id);
     const fotos = n ? [...(n.fotos || []), ...FOTOS_EMPAQUE] : [];
     const media = n
@@ -207,17 +207,67 @@ const paginas = {
     $("#relacionados").innerHTML = [getProducto(n.id), ...PRODUCTOS.filter(x => x.tipo === "recarga" && x.id !== p.id).slice(0, 3)].map(tarjetaProducto).join("");
   },
 
-  /* ---------- PROMOCIONES ---------- */
+  /* ---------- PROMOCIONES: mazo de tarjetas ---------- */
   promociones() {
-    const t = getProducto("torre"), c = PRECIOS[1];
-    $("#club-promo").innerHTML = formClub("grande");
-    $("#tabla-escalera").innerHTML = [1, 2, 3, 4].map(q => { const pct = q >= 4 ? PROMOS.escalera[4] : (PROMOS.escalera[q] || 0), tot = Math.round(c * q * (1 - pct));
+    const mazo = $("[data-mazo]"), cartas = $$(".mz-carta", mazo), N = cartas.length, puntos = $(".mz-puntos");
+    let act = 0;
+    try { const g = +sessionStorage.getItem("milu_promo_i"); if (g >= 0 && g < N) act = g; } catch {}
+    puntos.innerHTML = cartas.map((c, i) => `<button role="tab" aria-label="Promoción ${i + 1}"></button>`).join("");
+    const off = i => { let o = (i - act) % N; if (o > N / 2) o -= N; if (o < -N / 2) o += N; return o; };
+    const pintar = () => {
+      cartas.forEach((c, i) => {
+        const o = off(i), a = Math.abs(o);
+        c.className = "mz-carta " + (o === 0 ? "frente" : a === 1 ? (o < 0 ? "izq" : "der") : "atras");
+        c.style.setProperty("--k", Math.min(a - 1, 3));
+        c.style.zIndex = 20 - a * 2 + (o > 0 ? 1 : 0);
+        c.setAttribute("aria-hidden", o !== 0);
+        $(".mz-btn", c).tabIndex = o === 0 ? 0 : -1;
+      });
+      $$("button", puntos).forEach((b, i) => b.setAttribute("aria-selected", i === act));
+      try { sessionStorage.setItem("milu_promo_i", act); } catch {}
+    };
+    const ir = d => { act = (act + d + N) % N; sonido.efecto("burbuja"); pintar(); };
+    $$(".mz-flecha").forEach(b => b.onclick = () => ir(+b.dataset.mz));
+    puntos.onclick = e => { const b = e.target.closest("button"); if (b) { act = $$("button", puntos).indexOf(b); pintar(); } };
+    mazo.addEventListener("keydown", e => { if (e.key === "ArrowLeft") ir(-1); if (e.key === "ArrowRight") ir(1); });
+    // Arrastrar y barajear
+    let x0 = null, y0 = 0, dx = 0, carta = null, mov = false;
+    mazo.addEventListener("pointerdown", e => {
+      const c = e.target.closest(".mz-carta"); if (!c) return;
+      if (!c.classList.contains("frente")) { ir(c.classList.contains("izq") ? -1 : 1); return; }
+      if (e.target.closest("a")) { x0 = e.clientX; y0 = e.clientY; carta = c; mov = false; return; }
+      x0 = e.clientX; y0 = e.clientY; carta = c; mov = false; c.setPointerCapture(e.pointerId);
+    });
+    mazo.addEventListener("pointermove", e => {
+      if (x0 === null || !carta) return;
+      dx = e.clientX - x0; const dy = e.clientY - y0;
+      if (!mov && Math.abs(dx) < 6) return;
+      if (!mov && Math.abs(dy) > Math.abs(dx)) { x0 = null; return; }
+      mov = true; carta.classList.add("arrastrando");
+      carta.style.transform = `translateX(${dx}px) translateY(${Math.abs(dx) * -.05}px) rotate(${dx / 18}deg)`;
+    });
+    const soltar = () => {
+      if (x0 === null || !carta) { x0 = null; return; }
+      const c = carta; c.classList.remove("arrastrando"); c.style.transform = "";
+      if (mov && Math.abs(dx) > 70) { c.classList.add("barajeando"); setTimeout(() => c.classList.remove("barajeando"), 450); ir(dx < 0 ? 1 : -1); }
+      x0 = null; dx = 0; carta = null;
+    };
+    mazo.addEventListener("pointerup", soltar); mazo.addEventListener("pointercancel", soltar);
+    mazo.addEventListener("click", e => { if (mov) { e.preventDefault(); mov = false; } }, true);
+    pintar();
+  },
+
+  /* ---------- DETALLE DE UNA PROMOCIÓN ---------- */
+  promo() {
+    const t = getProducto("torre"), c = PRECIOS[1], el = s => $(s);
+    if (el("#club-promo")) el("#club-promo").innerHTML = formClub("grande");
+    if (el("#tabla-escalera")) el("#tabla-escalera").innerHTML = [1, 2, 3, 4].map(q => { const pct = q >= 4 ? PROMOS.escalera[4] : (PROMOS.escalera[q] || 0), tot = Math.round(c * q * (1 - pct));
       return `<tr><td>${q} ${q === 1 ? "cajón" : "cajones"}</td><td>${pct ? `−${Math.round(pct * 100)} %` : "—"}</td><td>${dinero(tot)}</td><td>${dinero(Math.round(tot / q))}</td></tr>`; }).join("") +
       `<tr class="destacada"><td>⭐ Torre (5 cajones + base y estructura)</td><td>Mejor precio</td><td>${dinero(PRECIO_TORRE)}</td><td>${dinero(PRECIO_TORRE / 5)}</td></tr>`;
-    $("#temporadas").innerHTML = PROMOS.temporadas.map(x => { const [m1, d1] = x.desde.split("-"), [m2, d2] = x.hasta.split("-"), mes = m => ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][+m - 1];
+    if (el("#temporadas")) el("#temporadas").innerHTML = PROMOS.temporadas.map(x => { const [m1, d1] = x.desde.split("-"), [m2, d2] = x.hasta.split("-"), mes = m => ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][+m - 1];
       return `<li><b>${x.nombre}</b><span>${+d1} ${mes(m1)} – ${+d2} ${mes(m2)}</span><span class="tp-mini">Torre a ${dinero(x.precioTorre)}</span></li>`; }).join("");
-    $("#dos-torres").textContent = dinero(t2Torres());
-    $("#dos-cajones").textContent = dinero(Math.round(c * 2 * (1 - PROMOS.escalera[2])));
+    if (el("#dos-torres")) el("#dos-torres").textContent = dinero(t2Torres());
+    if (el("#dos-cajones")) el("#dos-cajones").textContent = dinero(Math.round(c * 2 * (1 - PROMOS.escalera[2])));
   },
 
   /* ---------- ACTIVIDADES Y GUÍAS ---------- */
@@ -357,7 +407,7 @@ const paginas = {
             <form id="f-cupon" class="f-cupon">
               <label for="cupon">¿Tienes un código?</label>
               <div class="dos-col"><input id="cupon" name="cupon" value="${cupon}" placeholder="BIENVENIDA10" autocomplete="off"><button class="btn btn-sec btn-chico">Aplicar</button></div>
-              ${q.cuponNota ? `<p class="${q.usaCupon ? "ok" : "error"}">${q.cuponNota}</p>` : club.suscrito() ? "" : `<p class="ayuda">¿Aún no tienes uno? <a href="promociones.html#club">Únete al Club Milu</a> y recibe 10 % en tu primera compra.</p>`}
+              ${q.cuponNota ? `<p class="${q.usaCupon ? "ok" : "error"}">${q.cuponNota}</p>` : club.suscrito() ? "" : `<p class="ayuda">¿Aún no tienes uno? <a href="promo-club.html">Únete al Club Milu</a> y recibe 10 % en tu primera compra.</p>`}
             </form>
             <form id="f-pago" class="form-pago">
               <h3>Datos de envío</h3>

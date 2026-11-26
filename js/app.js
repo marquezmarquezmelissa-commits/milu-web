@@ -249,7 +249,7 @@ function header() {
   const niveles = NIVELES.map(n => `<li><a href="producto.html?id=${n.id}">Nivel ${n.nivel} · ${n.nombre}</a></li>`).join("");
   return `
   <a class="saltar" href="#contenido">Saltar al contenido</a>
-  <div class="barra-aviso">🚚 Envío gratis desde ${dinero(PROMOS.envioGratisDesde)} · ⭐ 10 % en tu primera compra al unirte al <a href="promociones.html#club">Club Milu</a>${temporadaActiva() ? ` · 🎉 ${temporadaActiva().nombre}: torre a ${dinero(temporadaActiva().precioTorre)}` : ""}</div>
+  <div class="barra-aviso">🚚 Envío gratis desde ${dinero(PROMOS.envioGratisDesde)} · ⭐ 10 % en tu primera compra al unirte al <a href="promo-club.html">Club Milu</a>${temporadaActiva() ? ` · 🎉 ${temporadaActiva().nombre}: torre a ${dinero(temporadaActiva().precioTorre)}` : ""}</div>
   <header class="header">
     <div class="h-fila contenedor">
       <button class="h-menu" aria-label="Abrir menú" aria-expanded="false">${iconos.menu}</button>

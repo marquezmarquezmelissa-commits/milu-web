@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entre más cajones, más ahorras | Promociones Milu & Me</title>
+  <meta name="description" content="Hasta 10 % menos al llevar 2, 3 o 4 cajones.">
+  <link rel="icon" href="img/marca/logo-insignia.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@700&display=swap">
+  <link rel="stylesheet" href="css/styles.css?v=12">
+</head>
+<body data-pagina="promo">
+  <!-- El header y el footer se insertan desde js/app.js -->
+  <main id="contenido">
+
+    <div class="promo-hero" style="--c1:#CDE7EF;--c2:#A4CFDD;--t:var(--pizarra)">
+      <div class="contenedor promo-hero-grid">
+        <div><a class="volver" href="promociones.html">← Todas las promociones</a>
+        <span class="eyebrow">Promoción 02 · Cantidad</span>
+        <h1>Entre más cajones, más ahorras</h1><p>Hasta 10 % menos al llevar 2, 3 o 4 cajones.</p></div>
+        <img src="img/marca/cohete-armable.png" alt="">
+      </div>
+    </div>
+    <div class="contenedor promos">
+      <div class="promo-sec"><h2>Cómo funciona</h2><ol class="pasos-promo"><li>Agrega 2 o más cajones al carrito (pueden ser de niveles distintos).</li><li>El descuento se aplica solo, no necesitas código.</li><li>Con 4 cajones te avisamos cuánto te falta para llevarte la torre completa.</li></ol>
+      <a class="btn btn-primario" href="tienda.html?tipo=cajon">Ver cajones</a></div>
+      <div class="promo-sec"><h2>Tabla de descuentos</h2>
+        <div class="scroll"><table class="tabla-datos tabla-promo"><thead><tr><th>En el carrito</th><th>Descuento</th><th>Total</th><th>Por cajón</th></tr></thead><tbody id="tabla-escalera"></tbody></table></div>
+        <p class="ayuda">La torre siempre es tu mejor opción: trae los 5 cajones, la base y la estructura.</p></div>
+        <div class="promo-sec familias"><h2>Para hermanos</h2>
+        <div class="scroll"><table class="tabla-datos"><thead><tr><th>Si compran…</th><th>Reciben</th></tr></thead><tbody>
+          <tr><td>2 cajones</td><td>5 % menos por cantidad → <b id="dos-cajones"></b></td></tr>
+          <tr><td>2 torres</td><td>La 2ª torre 10 % menos → <b id="dos-torres"></b> en total</td></tr>
+          <tr><td>Siempre</td><td>Un perfil gratis para cada hermano en la app</td></tr>
+          <tr><td>Después</td><td>Kits de recarga a $199</td></tr>
+        </tbody></table></div></div>
+      <nav class="promo-nav" aria-label="Otras promociones">
+        <a href="promo-club.html">← 10 % en tu primera compra</a><a href="promo-envio.html">Envío gratis desde $2,500 →</a>
+      </nav>
+    </div>
+  </main>
+  <script src="js/data.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
+  <script src="js/pages.js?v=12"></script>
+  <script src="js/milu-shimeji.js?v=12"></script>
+</body>
+</html>
