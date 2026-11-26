@@ -2,7 +2,7 @@
    Milu & Me · Milu "shimeji"
    Milu camina por la pantalla, trepa por las orillas, se suelta y cae.
    Lo puedes agarrar y aventar con el mouse o el dedo.
-   Un clic: Milu te saluda. Solo hay un Milu a la vez.
+   Un clic: Milu te saluda (y al siguiente, baila). Solo hay un Milu a la vez.
    Botón redondo abajo a la izquierda: mostrar / ocultar.
    ========================================================= */
 (() => {
@@ -10,14 +10,15 @@
   const ANIM = {
     camina: { src: "img/personajes/milu-caminando.webp", w: 124, h: 300 },
     saludo: { src: "img/personajes/milu-saludo.webp", w: 165, h: 300, dur: 3.2 },
-    salto:  { src: "img/personajes/milu-salto.webp",  w: 162, h: 340, dur: 2.0 }
+    salto:  { src: "img/personajes/milu-salto.webp",  w: 162, h: 340, dur: 2.0 },
+    baile:  { src: "img/personajes/milu-baile.webp",  w: 212, h: 317, dur: 4.0 }
   };
   let cuentaAnim = 0;
   const MAX = 1, VEL = 48, G = 1500; // solo un Milu a la vez
   const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const guardado = (() => { try { return localStorage.getItem("milu_shimeji"); } catch { return null; } })();
   let activo = guardado ? guardado === "on" : !reducir;
-  const H = innerWidth < 600 ? 70 : 92, Wm = Math.round(H * 124 / 300);
+  const H = innerWidth < 600 ? 81 : 103, Wm = Math.round(H * 124 / 300);
   const lista = [];
 
   /* Botón para mostrar / ocultar */
@@ -61,7 +62,7 @@
     if (sujeto.movido < 6) { // solo un clic: Milu saluda
       const m = sujeto; m.el.classList.remove("agarrado"); sujeto = null;
       m.estado = m.y >= innerHeight - H - 2 ? "camina" : "cae"; m.vx = m.vy = 0;
-      if (m.estado === "camina") accion(m, "saludo");
+      if (m.estado === "camina") accion(m, (m.clics = (m.clics || 0) + 1) % 2 ? "saludo" : "baile"); // un clic saluda, el siguiente baila
       return;
     }
     sujeto.estado = "cae"; sujeto.vx = Math.max(-900, Math.min(900, sujeto.vx * .6)); sujeto.vy = Math.max(-900, Math.min(900, sujeto.vy * .6));
@@ -87,6 +88,7 @@
         m.x += m.dir * VEL * dt;
         if (Math.random() < dt * .05) accion(m, "saludo");                       // se detiene a saludar
         else if (Math.random() < dt * .04) accion(m, "salto");                   // brinca de gusto
+        else if (Math.random() < dt * .025) accion(m, "baile");                  // se pone a bailar
         else if (Math.random() < dt * .04) m.pausa = 1 + Math.random() * 1.5;   // se detiene a ver
         if (Math.random() < dt * .05) m.dir *= -1;                               // cambia de idea
         if (m.x <= 0 || m.x >= maxX) {

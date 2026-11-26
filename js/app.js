@@ -396,6 +396,20 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", e => { if (!e.target.closest(".nav-drop")) $$(".nav-drop").forEach(li => { li.classList.remove("abierto"); $(".nav-btn", li).setAttribute("aria-expanded", false); }); });
   document.addEventListener("keydown", e => { if (e.key === "Escape") $$(".nav-drop").forEach(li => li.classList.remove("abierto")); });
 
+  // Comparador deslizable (empaque)
+  $$("[data-comparador]").forEach(c => {
+    const r = $(".cmp-rango", c), set = v => c.style.setProperty("--pos", v + "%");
+    r.addEventListener("input", () => set(r.value)); set(r.value);
+    const vistas = c.parentElement.querySelector(".cmp-vistas");
+    if (vistas) vistas.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      $$("button", vistas).forEach(x => x.setAttribute("aria-pressed", x === b));
+      $(".cmp-a", c).src = b.dataset.a; $(".cmp-b img", c).src = b.dataset.b;
+      $(".cmp-et.izq", c).textContent = b.dataset.ea; $(".cmp-et.der", c).textContent = b.dataset.eb;
+      r.value = 50; set(50);
+    });
+  });
+
   const pagina = document.body.dataset.pagina;
   if (typeof paginas !== "undefined" && paginas[pagina]) paginas[pagina]();
 });

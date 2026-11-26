@@ -132,8 +132,13 @@ const paginas = {
       ? `<div class="promo-box"><b>Entre más cajones, más ahorras</b><span>2 cajones −5 % · 3 cajones −8 % · 4 cajones −10 %</span><a href="promociones.html">Ver promociones</a></div>`
       : `<div class="promo-box"><b>${temp ? `🎉 Precio de ${temp.nombre}` : "¿Son hermanos?"}</b><span>${temp ? "Solo por unos días." : `La 2ª torre tiene 10 % menos (2 torres: ${dinero(t2Torres())}).`}</span><a href="promociones.html#familias">Ver promociones</a></div>`;
     const fav = favs.tiene(p.id);
+    const fotos = n ? [...(n.fotos || []), ...FOTOS_EMPAQUE] : [];
     const media = n
-      ? `<div class="pd-media" style="--bg:${n.color}33">${arteCajon(n, "grande")}</div>`
+      ? `<div class="pd-galeria"><div class="pd-media" id="pd-media" style="--bg:${n.color}33">${arteCajon(n, "grande")}</div>
+          <div class="pd-miniaturas" role="group" aria-label="Fotos del producto">
+            <button type="button" aria-pressed="true" data-foto="" aria-label="Ilustración del cajón"><span class="mini-arte" style="color:${n.color}">▣</span></button>
+            ${fotos.map(([src, alt]) => `<button type="button" aria-pressed="false" data-foto="${src}" data-alt="${alt}" aria-label="${alt}"><img src="${src}" alt=""></button>`).join("")}
+          </div></div>`
       : `<div class="pd-media foto"><img src="img/producto/torre-completa.jpg" alt="Torre Milu & Me: cinco cajones apilados y el cohete de cinco piezas armado a un lado"></div>`;
     const incluye = n ? [...n.incluye, ...INCLUYE_SIEMPRE] : ["Los 5 cajones completos (niveles 1 al 5)", "Base con peso, tapa (placa superior) y tubo central", "Las 5 piezas del cohete de Milu", "Acceso a los 5 niveles en la app para iPad"];
     $("#producto").innerHTML = `
@@ -165,6 +170,12 @@ const paginas = {
       </div>`;
     $$(".cantidad button").forEach(b => b.onclick = () => { const i = $("#cant"); i.value = Math.max(1, (+i.value || 1) + +b.dataset.c); });
     $("#pd-add").onclick = () => carrito.agregar(p.id, Math.max(1, +$("#cant").value || 1));
+    const mins = $(".pd-miniaturas");
+    if (mins) mins.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      $$("button", mins).forEach(x => x.setAttribute("aria-pressed", x === b));
+      $("#pd-media").innerHTML = b.dataset.foto ? `<img class="foto-real" src="${b.dataset.foto}" alt="${b.dataset.alt}">` : arteCajon(n, "grande");
+    });
     $("#relacionados").innerHTML = PRODUCTOS.filter(x => x.id !== p.id).slice(0, 4).map(tarjetaProducto).join("");
   },
 

@@ -18,7 +18,7 @@ const TEMAS = {
    CONFIRMAR colores de N1, N4 y N5. */
 const NIVELES = [
   {
-    id: "nivel-1", personaje: "img/espacio/planeta.png", videos: { 0: "video/tutoriales/nivel1-actividad1.mp4" }, nivel: 1, edad: 2, etapa: "Maternal", tema: "espacio",
+    id: "nivel-1", fotos: [["img/producto/n1-material.jpg", "Material real del Nivel 1: tablero con estrellas y cajita de figuras"]], personaje: "img/espacio/planeta.png", videos: { 0: "video/tutoriales/nivel1-actividad1.mp4" }, nivel: 1, edad: 2, etapa: "Maternal", tema: "espacio",
     nombre: "Primer contacto", color: "#F9DB54", texto: "#4D5A71",
     resumen: "Las primeras formas, texturas y colores del universo de Milu.",
     habilidades: ["Motricidad fina", "Formas y colores", "Coordinación ojo-mano"],
@@ -93,6 +93,9 @@ const NIVELES = [
     ]
   }
 ];
+
+/* Fotos del empaque (se muestran en la galería de cada cajón) */
+const FOTOS_EMPAQUE = [["img/producto/empaque-frente.jpg", "Empaque, vista de frente"], ["img/producto/empaque-reverso.jpg", "Empaque, vista de atrás"]];
 
 /* Todo cajón incluye estas piezas */
 const INCLUYE_SIEMPRE = [
