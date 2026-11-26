@@ -42,7 +42,7 @@ const paginas = {
       panel.style.setProperty("--c", "#4D5A71"); panel.style.setProperty("--t", "#FFF8E8");
       panel.innerHTML = `
         <img class="tp-personaje" src="img/marca/cohete-armable.png" alt="">
-        <span class="chip-edad ahorro">Ahorra ${Math.round(DESCUENTO_TORRE * 100)}%</span>
+        <span class="chip-edad ahorro">Ahorra ${dinero(AHORRO_TORRE)}</span>
         <h3>La torre completa</h3>
         <p class="tp-tema">Los 5 cajones · de 2 a 6 años</p>
         <p>Cada cajón es un set con su propio nivel. Juntos forman una torre modular que crece con tu peque, y sus tubitos arman el cohete de Milu.</p>
@@ -134,7 +134,7 @@ const paginas = {
       <div class="pd-grid">
         ${media}
         <div class="pd-info">
-          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">Ahorra ${Math.round(DESCUENTO_TORRE * 100)}%</span>`}
+          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">Ahorra ${dinero(AHORRO_TORRE)}</span>`}
           <h1>${p.titulo}</h1>
           <p class="pd-tema">${n ? `${TEMAS[n.tema].emoji} Mundo ${TEMAS[n.tema].nombre} · ${n.actividades.length} actividades` : "2 a 6 años · 24 actividades"}</p>
           <p class="pd-precio">${p.precioLista ? `<s>${dinero(p.precioLista)}</s> ` : ""}${dinero(p.precio)}</p>
