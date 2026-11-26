@@ -1,5 +1,5 @@
 /* =========================================================
-   Milu & Me · Pulsera de cuentas con física + Milu caminando
+   Milu & Me · Pulsera de cuentas con física
    Hilo negro con cuentas de letras "MILU AND ME" (como las del kit).
    Se puede jalar con el mouse o el dedo.
    ========================================================= */
@@ -153,26 +153,14 @@
   const soltar = () => { if (arrastre) { tic(700); } arrastre = null; puntero = null; banda.classList.remove("jalando"); };
   cv.addEventListener("pointerup", soltar); cv.addEventListener("pointercancel", soltar);
 
-  /* ---------- Milu caminando ---------- */
-  const milu = banda.querySelector(".milu-camina");
-  let mx = -120, dir = 1;
-  function moverMilu(dt) {
-    if (!milu) return;
-    const w = milu.offsetWidth || 70;
-    mx += dir * 55 * dt;
-    if (mx > W + 10) { dir = -1; } if (mx < -w - 10) { dir = 1; }
-    milu.style.transform = `translateX(${mx}px) scaleX(${dir > 0 ? -1 : 1})`; // la imagen mira a la izquierda
-  }
-
   /* ---------- Bucle ---------- */
   montar();
   let last = performance.now();
   function frame(now) {
     const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
-    if (!reducir) { paso(dt); moverMilu(dt); } else if (now - t0 < 2000) paso(dt);
+    if (!reducir) { paso(dt); } else if (now - t0 < 2000) paso(dt);
     dibujar(); requestAnimationFrame(frame);
   }
-  if (reducir && milu) milu.style.transform = "translateX(40px)";
   requestAnimationFrame(frame);
   let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(montar, 150); });
 })();

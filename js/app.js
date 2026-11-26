@@ -95,7 +95,7 @@ function arteTorre(extra = "") {
 function tarjetaProducto(p) {
   const n = nivelDe(p), temp = p.tipo === "torre" ? temporadaActiva() : null;
   const fav = favs.tiene(p.id);
-  const arte = n ? arteCajon(n, p.tipo === "recarga" ? "recarga" : "") : `<img src="img/producto/torre.jpg" alt="" loading="lazy">`;
+  const arte = n ? arteCajon(n, p.tipo === "recarga" ? "recarga" : "") : `<img src="img/producto/torre-completa.jpg" alt="" loading="lazy">`;
   const etiqueta = p.tipo === "cajon" ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años</span>`
     : p.tipo === "recarga" ? `<span class="chip-edad chip-recarga">Recarga · Nivel ${n.nivel}</span>`
     : `<span class="chip-edad ahorro">${temp ? "🎉 " + temp.nombre : "5 cajones"}</span>`;
@@ -261,7 +261,7 @@ function header() {
               <div><h4>Por edad</h4><ul>${edades}</ul></div>
               <div><h4>Por tema</h4><ul>${temas}</ul></div>
               <div><h4>Por nivel</h4><ul>${niveles}</ul></div>
-              <a class="mega-torre" href="producto.html?id=torre"><img src="img/producto/torre.jpg" alt=""><span><b>Torre completa</b>Los 5 cajones · ${dinero(PRECIO_TORRE)}</span></a>
+              <a class="mega-torre" href="producto.html?id=torre"><img src="img/producto/torre-completa.jpg" alt=""><span><b>Torre completa</b>Los 5 cajones · ${dinero(PRECIO_TORRE)}</span></a>
             </div>
           </li>
           <li><a class="nav-btn" href="promociones.html">Promociones</a></li>

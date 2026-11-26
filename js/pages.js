@@ -134,7 +134,7 @@ const paginas = {
     const fav = favs.tiene(p.id);
     const media = n
       ? `<div class="pd-media" style="--bg:${n.color}33">${arteCajon(n, "grande")}</div>`
-      : `<div class="pd-media foto"><img src="img/producto/torre.jpg" alt="Torre Milu & Me con los 5 cajones apilados en rosa, amarillo, azul, crema y azul pizarra"></div>`;
+      : `<div class="pd-media foto"><img src="img/producto/torre-completa.jpg" alt="Torre Milu & Me: cinco cajones apilados y el cohete de cinco piezas armado a un lado"></div>`;
     const incluye = n ? [...n.incluye, ...INCLUYE_SIEMPRE] : ["Los 5 cajones completos (niveles 1 al 5)", "Base con peso, tapa (placa superior) y tubo central", "Las 5 piezas del cohete de Milu", "Acceso a los 5 niveles en la app para iPad"];
     $("#producto").innerHTML = `
       <nav class="migas" aria-label="Ruta"><a href="index.html">Inicio</a> › <a href="tienda.html">Tienda</a> › <span>${p.titulo}</span></nav>
@@ -328,7 +328,7 @@ const paginas = {
           <ul class="cart-lista">${it.map(x => {
             const p = getProducto(x.id), n = nivelDe(p);
             return `<li class="cart-item">
-              <div class="ci-media">${n ? arteCajon(n, "mini") : `<img src="img/producto/torre.jpg" alt="">`}</div>
+              <div class="ci-media">${n ? arteCajon(n, "mini") : `<img src="img/producto/torre-completa.jpg" alt="">`}</div>
               <div class="ci-info"><a href="producto.html?id=${p.id}"><b>${p.titulo}</b></a><span>${dinero(p.precio)}</span>
                 <button class="link" data-quitar="${p.id}">Quitar</button></div>
               <div class="cantidad"><button data-menos="${p.id}" aria-label="Menos">−</button><input value="${x.cant}" readonly aria-label="Cantidad"><button data-mas="${p.id}" aria-label="Más">+</button></div>
