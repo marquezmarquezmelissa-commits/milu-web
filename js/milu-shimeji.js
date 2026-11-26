@@ -2,7 +2,7 @@
    Milu & Me · Milu "shimeji"
    Milu camina por la pantalla, trepa por las orillas, se suelta y cae.
    Lo puedes agarrar y aventar con el mouse o el dedo.
-   Doble clic (o doble toque): ¡aparece otro Milu! (máximo 4)
+   Un clic: Milu te saluda. Solo hay un Milu a la vez.
    Botón redondo abajo a la izquierda: mostrar / ocultar.
    ========================================================= */
 (() => {
@@ -13,7 +13,7 @@
     salto:  { src: "img/personajes/milu-salto.webp",  w: 162, h: 340, dur: 2.0 }
   };
   let cuentaAnim = 0;
-  const MAX = 4, VEL = 48, G = 1500;
+  const MAX = 1, VEL = 48, G = 1500; // solo un Milu a la vez
   const reducir = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const guardado = (() => { try { return localStorage.getItem("milu_shimeji"); } catch { return null; } })();
   let activo = guardado ? guardado === "on" : !reducir;
@@ -38,9 +38,6 @@
                 estado: "cae", pared: 0, meta: 0, pausa: 0, rot: 0, anim: "", accion: null, tAccion: 0, movido: 0 };
     lista.push(m); poner(m, "camina");
     el.addEventListener("pointerdown", e => agarrar(e, m));
-    el.addEventListener("dblclick", () => { crear(m.x + 30, m.y - 40); pop(); });
-    let ultimoToque = 0;
-    el.addEventListener("pointerup", e => { if (e.pointerType === "touch") { const t = Date.now(); if (t - ultimoToque < 320) { crear(m.x + 30, m.y - 40); pop(); } ultimoToque = t; } });
     return m;
   }
 
@@ -134,8 +131,6 @@
     const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
     if (activo) {
       lista.forEach(m => { paso(m, dt); pintar(m, now); });
-      reloj += dt;
-      if (reloj > 45 && lista.length < 2) { reloj = 0; if (Math.random() < .5) { crear(); pop(); } }
     }
     requestAnimationFrame(frame);
   }
