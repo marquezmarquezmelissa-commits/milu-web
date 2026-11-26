@@ -14,7 +14,7 @@
   const C = { rosa: "#EC76AD", rosaClaro: "#F7B9D3", lila: "#B9A5E8", cielo: "#7CC6E6", azul: "#3FA9DE", amarillo: "#F9DB54", crema: "#FFF8E8" };
   const LETRAS = [C.lila, C.rosa, C.cielo, C.amarillo, C.rosaClaro];
   const PONY = [C.rosa, C.lila, C.amarillo, C.rosaClaro, C.cielo];
-  const FUENTE = `"Arial Rounded MT Bold","Nunito","Varela Round","Arial Black","Helvetica Neue",Arial,sans-serif`;
+  const FUENTE = `"Fredoka","Arial Rounded MT Bold","Nunito","Arial Black",Arial,sans-serif`; // letra redonda con huecos abiertos, como las cuentas reales
 
   const tono = (hex, amt) => { // aclara (+) u oscurece (−)
     const n = parseInt(hex.slice(1), 16), f = v => Math.max(0, Math.min(255, Math.round(amt > 0 ? v + (255 - v) * amt : v * (1 + amt))));
@@ -29,23 +29,37 @@
     x.fillStyle = g; x.fillRect(0, 0, w, h); x.globalCompositeOperation = "source-over";
   }
   function spriteLetra(l, c, alto) {
-    const fs = alto, prof = Math.round(alto * .1), grosor = alto * .2;
-    const [m] = lienzo(10, 10), mx = m.getContext("2d"); mx.font = `900 ${fs}px ${FUENTE}`;
-    const ancho = mx.measureText(l).width + grosor + 6, h = alto * 1.05 + grosor + prof;
-    const [cv2, x] = lienzo(ancho, h), cx = ancho / 2, cy = (h - prof) / 2;
-    x.font = `900 ${fs}px ${FUENTE}`; x.textAlign = "center"; x.textBaseline = "middle"; x.lineJoin = "round"; x.lineWidth = grosor;
-    const glifo = (dy, color) => { x.fillStyle = x.strokeStyle = color; x.strokeText(l, cx, cy + dy); x.fillText(l, cx, cy + dy); };
-    for (let k = prof; k > 0; k--) glifo(k, tono(c, -.32 + k * .015));      // volumen (extrusión)
-    // cara frontal en una capa aparte para darle brillo
-    const [cf, fx] = lienzo(ancho, h);
-    fx.font = x.font; fx.textAlign = "center"; fx.textBaseline = "middle"; fx.lineJoin = "round"; fx.lineWidth = grosor;
-    const g = fx.createLinearGradient(0, cy - fs / 2, 0, cy + fs / 2); g.addColorStop(0, tono(c, .35)); g.addColorStop(1, tono(c, -.06));
-    fx.fillStyle = fx.strokeStyle = g; fx.strokeText(l, cx, cy); fx.fillText(l, cx, cy);
-    brillo(fx, ancho, h, .55);
-    // borde suave interior
-    fx.globalCompositeOperation = "source-atop"; fx.lineWidth = 2; fx.strokeStyle = "rgba(255,255,255,.16)"; fx.strokeText(l, cx - 1, cy - 1.5); fx.globalCompositeOperation = "source-over";
+    const fs = alto * 1.04, prof = Math.round(alto * .11), grosor = alto * .13, pad = 8;
+    const [m] = lienzo(10, 10), mx = m.getContext("2d"); mx.font = `700 ${fs}px ${FUENTE}`;
+    const met = mx.measureText(l), ancho = met.width + grosor + pad * 2, h = alto + prof + pad * 2;
+    const [cv2, x] = lienzo(ancho, h), cx = ancho / 2, cy = pad + alto / 2 + alto * .04;
+    const prep = k => { k.font = `700 ${fs}px ${FUENTE}`; k.textAlign = "center"; k.textBaseline = "middle"; k.lineJoin = "round"; k.lineWidth = grosor; };
+    const glifo = (k, dx, dy, color) => { k.fillStyle = k.strokeStyle = color; k.strokeText(l, cx + dx, cy + dy); k.fillText(l, cx + dx, cy + dy); };
+    prep(x);
+    // 1) volumen: lados más oscuros hacia abajo
+    for (let k = prof; k > 0; k--) glifo(x, k * .25, k, tono(c, -.38 + (prof - k) * .02));
+    // 2) cara frontal
+    const [cf, fx] = lienzo(ancho, h); prep(fx);
+    const g = fx.createLinearGradient(0, cy - alto / 2, 0, cy + alto / 2); g.addColorStop(0, tono(c, .3)); g.addColorStop(.55, c); g.addColorStop(1, tono(c, -.12));
+    glifo(fx, 0, 0, g);
+    // 3) bisel: sombra interior abajo-derecha y luz arriba-izquierda (dan forma y separan los huecos)
+    const bisel = (dx, dy, color, blur, alpha) => {
+      const [cb, bx] = lienzo(ancho, h); prep(bx);
+      bx.fillStyle = color; bx.fillRect(0, 0, ancho, h);
+      bx.globalCompositeOperation = "destination-out"; glifo(bx, dx, dy, "#000");
+      fx.save(); fx.globalCompositeOperation = "source-atop"; fx.globalAlpha = alpha; fx.filter = `blur(${blur}px)`;
+      fx.drawImage(cb, 0, 0, ancho, h); fx.restore();
+    };
+    bisel(-2.2, -3, tono(c, -.45), 2.2, .9);   // sombra interior
+    bisel(1.6, 2.2, "#ffffff", 1.6, .85);       // luz interior
+    // 4) reflejo brillante (plástico)
+    fx.save(); fx.globalCompositeOperation = "source-atop";
+    const gl = fx.createLinearGradient(0, cy - alto / 2, 0, cy); gl.addColorStop(0, "rgba(255,255,255,.55)"); gl.addColorStop(1, "rgba(255,255,255,0)");
+    fx.fillStyle = gl; fx.fillRect(0, cy - alto / 2, ancho, alto * .32); fx.restore();
+    // 5) contorno fino para que se lea mejor
+    fx.lineWidth = 1.2; fx.strokeStyle = tono(c, -.3); fx.globalAlpha = .55; fx.strokeText(l, cx, cy); fx.globalAlpha = 1;
     x.drawImage(cf, 0, 0, ancho, h);
-    return { img: cv2, w: ancho, h, rad: Math.min(ancho, alto) * .5 };
+    return { img: cv2, w: ancho - pad * 1.4, h, rad: Math.min(ancho - pad * 2, alto) * .5, letra: true };
   }
   function spritePony(c, w, h) {
     const [cv2, x] = lienzo(w, h + 4);
@@ -83,11 +97,11 @@
   }
 
   /* ---------- Armar la pulsera ---------- */
-  let S = 1, GAP = 12;
+  let S = 1, GAP = 5;
   const cache = new Map();
   const spr = (key, fn) => cache.has(key) ? cache.get(key) : (cache.set(key, fn()), cache.get(key));
   const B = {
-    letra: (l, i) => spr(`l${l}${i}${S}`, () => spriteLetra(l, LETRAS[i % LETRAS.length], 62 * S)),
+    letra: (l, i) => spr(`l${l}${i}${S}`, () => spriteLetra(l, LETRAS[i % LETRAS.length], 82 * S)),
     pony: i => spr(`p${i % PONY.length}${S}`, () => spritePony(PONY[i % PONY.length], 30 * S, 40 * S)),
     rayada: () => spr(`r${S}`, () => spriteBola(C.azul, 38 * S, true)),
     bola: i => spr(`b${i % 3}${S}`, () => spriteBola([C.cielo, C.rosa, C.lila][i % 3], 34 * S, false)),
@@ -95,28 +109,28 @@
   };
   function armarSarta(largo) {
     const pal = (txt, k) => [...txt].map((l, i) => B.letra(l, i + k));
-    const centro = [B.estrella(), B.pony(0), B.rayada(), B.pony(1), ...pal("MILU", 0), B.pony(2), B.rayada(), B.pony(3),
-      B.letra("&", 3), B.pony(4), B.rayada(), B.pony(0), ...pal("ME", 1), B.pony(1), B.rayada(), B.pony(2), B.estrella()];
+    const centro = [B.estrella(), B.pony(0), B.bola(0), B.rayada(), B.pony(1), ...pal("MILU", 0), B.pony(2), B.rayada(), B.pony(3),
+      B.letra("&", 3), B.pony(4), B.rayada(), B.pony(0), ...pal("ME", 1), B.pony(1), B.rayada(), B.bola(1), B.pony(2), B.estrella()];
     const ancho = arr => arr.reduce((a, b) => a + b.w + GAP, 0);
     const patron = i => [B.pony(i), B.rayada(), B.pony(i + 2), B.bola(i), B.pony(i + 1), B.estrella()][i % 6];
     let izq = [], der = [], i = 0;
-    while (ancho(izq) + ancho(der) + ancho(centro) < largo) { (i % 2 ? der : izq).push(patron(Math.floor(i / 2))); i++; }
+    while (true) { const b = patron(Math.floor(i / 2)); if (ancho(izq) + ancho(der) + ancho(centro) + b.w + GAP > largo) break; (i % 2 ? der : izq).push(b); i++; }
     return [...izq.reverse(), ...centro, ...der];
   }
 
   /* ---------- Física (Verlet + choques entre cuentas) ---------- */
   let W, H, pts = [], arrastre = null, puntero = null;
-  const Gr = 1500, DAMP = .988, ITER = 12;
+  const Gr = 1300, DAMP = .985, ITER = 40;
   function montar() {
     const r = banda.getBoundingClientRect();
     W = r.width; H = cv.clientHeight;
     cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     const nuevoS = Math.max(.6, Math.min(1, W / 900));
     if (nuevoS !== S) { S = nuevoS; cache.clear(); }
-    GAP = 12 * S;
+    GAP = 5 * S;
     const yA = 26, span = W + 60, sag = Math.min(80, H - 90);
     const largo = span + (8 * sag * sag) / (3 * span);
-    const beads = armarSarta(largo - 20);
+    const beads = armarSarta(largo);
     const x0 = -30;
     pts = [{ x: x0, y: yA, px: x0, py: yA, fijo: true }];
     const tot = beads.reduce((a, b) => a + b.w + GAP, 0), esc = span / tot;
@@ -172,7 +186,7 @@
     for (let i = 1; i < pts.length - 1; i++) {
       const p = pts[i], a = pts[i - 1], b = pts[i + 1], s = p.b;
       let ang = Math.atan2(b.y - a.y, b.x - a.x);
-      if (s.img && s.h > 50 * S) ang *= .4; // las letras se mantienen casi derechas para leerse
+      if (s.letra) ang *= .35; // las letras se mantienen casi derechas para leerse
       ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(ang);
       ctx.shadowColor = "rgba(77,90,113,.28)"; ctx.shadowBlur = 8; ctx.shadowOffsetY = 6;
       ctx.drawImage(s.img, -s.w / 2, -s.h / 2, s.w, s.h);
@@ -209,6 +223,7 @@
 
   /* ---------- Bucle ---------- */
   montar();
+  if (document.fonts && document.fonts.load) document.fonts.load(`700 60px Fredoka`).then(() => { cache.clear(); montar(); }).catch(() => {});
   let last = performance.now(), t0 = last;
   function frame(now) {
     const dt = Math.min(1 / 30, (now - last) / 1000); last = now;
