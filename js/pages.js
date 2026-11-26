@@ -42,12 +42,12 @@ const paginas = {
       panel.style.setProperty("--c", "#4D5A71"); panel.style.setProperty("--t", "#FFF8E8");
       panel.innerHTML = `
         <img class="tp-personaje" src="img/marca/cohete-armable.png" alt="">
-        <span class="chip-edad ahorro">Ahorra ${dinero(AHORRO_TORRE)}</span>
+        <span class="chip-edad ahorro">5 cajones</span>
         <h3>La torre completa</h3>
         <p class="tp-tema">Los 5 cajones · de 2 a 6 años</p>
         <p>Cada cajón es un set con su propio nivel. Juntos forman una torre modular que crece con tu peque, y sus tubitos arman el cohete de Milu.</p>
         <ul class="tp-acts">${NIVELES.map(n => `<li><span class="punto" style="--c:${n.color}"></span>Nivel ${n.nivel} · ${n.edad} años</li>`).join("")}</ul>
-        <p class="tp-precio"><s>${dinero(t.precioLista)}</s> ${dinero(t.precio)}</p>
+        <p class="tp-precio">${dinero(t.precio)}</p>
         <div class="tp-botones">
           <button class="btn btn-primario" data-add="torre">Agregar la torre</button>
           <a class="btn btn-sec" href="producto.html?id=torre">Ver torre</a>
@@ -134,7 +134,7 @@ const paginas = {
       <div class="pd-grid">
         ${media}
         <div class="pd-info">
-          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">Ahorra ${dinero(AHORRO_TORRE)}</span>`}
+          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">5 cajones</span>`}
           <h1>${p.titulo}</h1>
           <p class="pd-tema">${n ? `${TEMAS[n.tema].emoji} Mundo ${TEMAS[n.tema].nombre} · ${n.actividades.length} actividades` : "2 a 6 años · 24 actividades"}</p>
           <p class="pd-precio">${p.precioLista ? `<s>${dinero(p.precioLista)}</s> ` : ""}${dinero(p.precio)}</p>
@@ -267,7 +267,7 @@ const paginas = {
       const sueltos = NIVELES.filter(n => it.some(x => x.id === n.id)).length;
       const t = getProducto("torre");
       const sugerencia = sueltos >= 3 && !it.some(x => x.id === "torre")
-        ? `<div class="sugerencia">💡 Llevas ${sueltos} cajones. Con la <b>torre completa</b> tienes los 5 por ${dinero(t.precio)} (ahorras ${dinero(t.precioLista - t.precio)}). <a href="producto.html?id=torre">Ver torre</a></div>` : "";
+        ? `<div class="sugerencia">💡 Llevas ${sueltos} cajones. Con la <b>torre completa</b> tienes los 5 niveles en una torre modular por ${dinero(t.precio)}. <a href="producto.html?id=torre">Ver torre</a></div>` : "";
       $("#carrito").innerHTML = `
         ${sugerencia}
         <div class="cart-grid">

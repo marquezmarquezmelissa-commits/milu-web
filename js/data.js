@@ -6,7 +6,6 @@
 /* Precios de venta (MXN) · de "Costos_por_cajon_Milu.pdf" (versión verificada, nov 2026) */
 const PRECIOS = { 1: 1099, 2: 1099, 3: 1099, 4: 1099, 5: 1099 };
 const PRECIO_TORRE = 4699;          // Torre completa (5 cajones) · precio verificado
-const DESCUENTO_TORRE = 0.15;       // ~15 % frente a comprar los 5 sueltos
 
 const TEMAS = {
   espacio: { nombre: "Espacio", emoji: "🚀", fondo: "img/fondos/espacio.jpg", amigos: ["img/personajes/alien.png", "img/espacio/planeta.png"], desc: "Milu despega, explora planetas y prepara su regreso a casa." },
@@ -112,7 +111,6 @@ const PRODUCTOS = [
   {
     id: "torre", tipo: "torre", nivel: null, edad: null, tema: "todos",
     titulo: "Torre completa · 5 cajones",
-    precioLista: Object.values(PRECIOS).reduce((a, b) => a + b, 0),
     precio: PRECIO_TORRE
   }
 ];
@@ -122,5 +120,3 @@ const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").repla
 function pdfActividad(nivel, i, titulo) { return `descargas/nivel-${nivel}/${i + 1}-${slug(titulo)}.pdf`; }
 function pdfManual(nivel) { return `descargas/nivel-${nivel}/manual-nivel-${nivel}.pdf`; }
 
-const AHORRO_TORRE = getAhorroTorre();
-function getAhorroTorre() { const t = PRODUCTOS.find(p => p.id === "torre"); return t.precioLista - t.precio; }
