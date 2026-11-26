@@ -5,7 +5,8 @@
 
 /* Precios de venta (MXN) · de "Costos_por_cajon_Milu.pdf" (versión verificada, nov 2026) */
 const PRECIOS = { 1: 1099, 2: 1099, 3: 1099, 4: 1099, 5: 1099 };
-const PRECIO_TORRE = 4699;          // Torre completa (5 cajones) · precio verificado
+const PRECIO_TORRE = 4699;
+const PRECIO_RECARGA_BASE = 199;          // Torre completa (5 cajones) · precio verificado
 
 const TEMAS = {
   espacio: { nombre: "Espacio", emoji: "🚀", fondo: "img/fondos/espacio.jpg", amigos: ["img/personajes/alien.png", "img/espacio/planeta.png"], desc: "Milu despega, explora planetas y prepara su regreso a casa." },
@@ -45,7 +46,7 @@ const NIVELES = [
     ]
   },
   {
-    id: "nivel-3", personaje: "img/personajes/medusa.png", videos: { 0: "video/tutoriales/nivel3-actividad1.mp4", 2: "video/tutoriales/nivel3-actividad3.mp4", 3: "video/tutoriales/nivel3-actividad4.mp4", 7: "video/tutoriales/nivel3-actividad8.mp4" }, nivel: 3, edad: 4, etapa: "PK4", tema: "oceano",
+    id: "nivel-3", personaje: "img/personajes/medusa.png", videos: { 0: "video/tutoriales/nivel3-actividad1.mp4", 1: "video/tutoriales/nivel3-actividad2.mp4", 2: "video/tutoriales/nivel3-actividad3.mp4", 3: "video/tutoriales/nivel3-actividad4.mp4", 4: "video/tutoriales/nivel3-actividad5.mp4", 5: "video/tutoriales/nivel3-actividad6.mp4", 6: "video/tutoriales/nivel3-actividad7.mp4", 7: "video/tutoriales/nivel3-actividad8.mp4" }, nivel: 3, edad: 4, etapa: "PK4", tema: "oceano",
     nombre: "Explorando las profundidades", color: "#A4CFDD", texto: "#4D5A71",
     resumen: "Rescata criaturas, ensarta perlas y recupera la pieza de la nave.",
     habilidades: ["Uso de pinzas", "Patrones y secuencias", "Trazos curvos"],
@@ -111,9 +112,44 @@ const PRODUCTOS = [
   {
     id: "torre", tipo: "torre", nivel: null, edad: null, tema: "todos",
     titulo: "Torre completa · 5 cajones",
-    precio: PRECIO_TORRE
-  }
+    get precio() { const t = temporadaActiva(); return t ? t.precioTorre : PRECIO_TORRE; },
+    get precioLista() { return temporadaActiva() ? PRECIO_TORRE : undefined; }
+  },
+  ...NIVELES.map(n => ({
+    id: `recarga-${n.nivel}`, tipo: "recarga", nivel: n.nivel, edad: n.edad, tema: n.tema,
+    titulo: `Kit de recarga · Nivel ${n.nivel}`, precio: PRECIO_RECARGA_BASE, color: n.color, texto: n.texto
+  }))
 ];
+
+/* ---------- Kits de recarga (material que se gasta) ---------- */
+const RECARGA_INCLUYE = {
+  1: ["Plastilina de 3 colores", "Hoja de trabajo y 2 plantillas", "Papel de colores", "Hoja de stickers"],
+  2: ["Pompones de varios tamaños", "Estambre", "3 hojas de trabajo", "Hoja de stickers"],
+  3: ["Plastilina de 3 colores", "Cuentas grandes y chicas", "Cordón y limpiapipas", "3 hojas de trabajo y plantilla de medusa", "Papel de colores", "Hoja de stickers"],
+  4: ["Estambre", "2 hojas de trabajo", "2 plantillas armables", "Papel de colores", "Hoja de stickers"],
+  5: ["Plastilina de 3 colores", "3 hojas de trabajo", "Papel de colores", "Hoja de stickers"]
+};
+
+/* ---------- Promociones (edita aquí) ---------- */
+const PROMOS = {
+  cupon: { codigo: "BIENVENIDA10", pct: 0.10 },          // 1ª compra al dejar tu correo · 1 sola vez
+  escalera: { 2: 0.05, 3: 0.08, 4: 0.10 },               // % según cajones en el carrito (4 o más = 10 %)
+  envioGratisDesde: 2500, costoEnvio: 180,
+  segundaTorrePct: 0.10,                                 // 2ª torre (o más) 10 % menos
+  temporadas: [                                          // Torre a $3,999 solo estos días (mes-día)
+    { id: "dia-del-nino", nombre: "Día del Niño", desde: "04-23", hasta: "04-30", precioTorre: 3999 },
+    { id: "buen-fin", nombre: "Buen Fin", desde: "11-13", hasta: "11-17", precioTorre: 3999 },
+    { id: "navidad", nombre: "Navidad y Reyes", desde: "12-15", hasta: "01-06", precioTorre: 3999 }
+  ]
+};
+function temporadaActiva() {
+  let demo = null;
+  try { demo = new URLSearchParams(location.search).get("temporada") || sessionStorage.getItem("milu_temporada"); if (demo) sessionStorage.setItem("milu_temporada", demo); if (demo === "off") { sessionStorage.removeItem("milu_temporada"); demo = null; } } catch {}
+  if (demo) return PROMOS.temporadas.find(t => t.id === demo) || PROMOS.temporadas[0];
+  const d = new Date(), md = String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  return PROMOS.temporadas.find(t => t.desde <= t.hasta ? (md >= t.desde && md <= t.hasta) : (md >= t.desde || md <= t.hasta)) || null;
+}
+const nivelDe = p => p && p.nivel ? NIVELES[p.nivel - 1] : null;
 
 /* PDFs descargables (en /descargas). Reemplaza los archivos con los finales, mismo nombre. */
 const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

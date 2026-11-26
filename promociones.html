@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promociones | Milu & Me</title>
+  <meta name="description" content="Descuentos, envío gratis, Temporada Milu y kits de recarga.">
+  <link rel="icon" href="img/marca/logo-insignia.png">
+  <link rel="stylesheet" href="css/styles.css?v=5">
+</head>
+<body data-pagina="promociones">
+  <!-- El header y el footer se insertan desde js/app.js -->
+  <main id="contenido">
+
+    <div class="tienda-cabecera" style="background:var(--cielo)"><div class="contenedor">
+      <span class="eyebrow" style="color:var(--pizarra)">Promociones</span>
+      <h1>Más juego, mejor precio</h1>
+      <p>Ahorra al llevar más cajones, recibe envío gratis y únete al Club Milu.</p>
+    </div></div>
+    <div class="contenedor promos">
+      <section id="club" class="promo-sec club-sec">
+        <img src="img/personajes/milu-astronauta.png" alt="" class="promo-img">
+        <div><span class="eyebrow">1 · Club Milu</span><h2>10 % en tu primera compra</h2>
+        <p>Déjanos tu correo y recibe el código <b>BIENVENIDA10</b>. Es válido una sola vez y no se combina con otros descuentos: el carrito aplica siempre el que más te conviene.</p>
+        <div id="club-promo"></div></div>
+      </section>
+
+      <section id="escalera" class="promo-sec">
+        <span class="eyebrow">2 · Entre más cajones, más ahorras</span><h2>Descuento por cantidad</h2>
+        <p>El descuento se aplica solo en tu carrito. La torre siempre es tu mejor opción.</p>
+        <div class="scroll"><table class="tabla-datos tabla-promo"><thead><tr><th>En el carrito</th><th>Descuento</th><th>Total</th><th>Por cajón</th></tr></thead><tbody id="tabla-escalera"></tbody></table></div>
+        <p class="ayuda">Con 4 cajones en el carrito, te avisamos cuánto te falta para llevarte la torre completa con base y estructura.</p>
+      </section>
+
+      <section id="envio" class="promo-sec">
+        <span class="eyebrow">3 · Envío</span><h2>🚚 Envío gratis desde $2,500</h2>
+        <p>Incluido desde 3 cajones o en la torre. Con 1 o 2 cajones, el envío cuesta $180. En tu carrito verás cuánto te falta para tenerlo gratis.</p>
+      </section>
+
+      <section id="completa" class="promo-sec">
+        <span class="eyebrow">4 · Completa tu torre</span><h2>🎁 La base, la estructura y la tapa, de regalo</h2>
+        <p>¿Compras un cajón por cada edad de tu peque? Al comprar tu 5º cajón con tu cuenta, te regalamos la base, la estructura y la tapa para armar la torre completa.</p>
+      </section>
+
+      <section id="temporada" class="promo-sec">
+        <span class="eyebrow">5 · Fechas especiales</span><h2>La torre a $3,999</h2>
+        <p>Solo unos días al año, y solo en la torre:</p>
+        <ul class="temporadas" id="temporadas"></ul>
+      </section>
+
+      <section id="temporada-milu" class="promo-sec temporada-milu">
+        <img src="img/marca/cohete-volador.png" alt="" class="promo-img">
+        <div><span class="eyebrow">6 · Temporada Milu</span><h2>Siempre hay algo nuevo</h2>
+        <ul class="lista-check">
+          <li><b>Cada 3 meses:</b> un play kit nuevo con actividades para jugar con tu cajón.</li>
+          <li><b>Cada mes:</b> contenido digital nuevo en la app y en Actividades y guías.</li>
+          <li><b>Al completar los 5 play kits:</b> te regalamos la tapa de la torre.</li>
+        </ul>
+        <p class="ayuda">Próximamente. Únete al Club Milu para enterarte primero.</p></div>
+      </section>
+
+      <section id="recarga" class="promo-sec">
+        <span class="eyebrow">7 · Kits de recarga</span><h2>¿Se acabó la plastilina? $199</h2>
+        <p>Plastilina, hojas de trabajo, cuentas, cordones y papel para volver a jugar tu nivel. Perfecto si juegan dos hermanos.</p>
+        <a class="btn btn-primario" href="tienda.html?tipo=recarga">Ver kits de recarga</a>
+      </section>
+
+      <section id="familias" class="promo-sec familias">
+        <span class="eyebrow">Familias con 2 niños</span><h2>Para hermanos</h2>
+        <div class="scroll"><table class="tabla-datos"><thead><tr><th>Si compran…</th><th>Reciben</th></tr></thead><tbody>
+          <tr><td>2 cajones</td><td>5 % menos por cantidad → <b id="dos-cajones"></b></td></tr>
+          <tr><td>2 torres</td><td>La 2ª torre 10 % menos → <b id="dos-torres"></b> en total</td></tr>
+          <tr><td>Siempre</td><td>Un perfil gratis para cada hermano en la app</td></tr>
+          <tr><td>Después</td><td>Kits de recarga a $199</td></tr>
+        </tbody></table></div>
+      </section>
+    </div>
+  </main>
+  <script src="js/data.js?v=5"></script>
+  <script src="js/app.js?v=5"></script>
+  <script src="js/pages.js?v=5"></script>
+</body>
+</html>

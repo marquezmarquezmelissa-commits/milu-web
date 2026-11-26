@@ -93,15 +93,17 @@ function arteTorre(extra = "") {
 
 /* ---------- Tarjeta de producto ---------- */
 function tarjetaProducto(p) {
-  const n = p.tipo === "cajon" ? getNivel(p.id) : null;
+  const n = nivelDe(p), temp = p.tipo === "torre" ? temporadaActiva() : null;
   const fav = favs.tiene(p.id);
-  const arte = n ? arteCajon(n) : `<img src="img/producto/torre.jpg" alt="" loading="lazy">`;
-  const etiqueta = n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años</span>`
-                     : `<span class="chip-edad ahorro">5 cajones</span>`;
-  const sub = n ? `${TEMAS[n.tema].emoji} ${TEMAS[n.tema].nombre} · ${n.etapa} · ${n.actividades.length} actividades`
-                : "Los 5 niveles · 2 a 6 años · 24 actividades";
+  const arte = n ? arteCajon(n, p.tipo === "recarga" ? "recarga" : "") : `<img src="img/producto/torre.jpg" alt="" loading="lazy">`;
+  const etiqueta = p.tipo === "cajon" ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años</span>`
+    : p.tipo === "recarga" ? `<span class="chip-edad chip-recarga">Recarga · Nivel ${n.nivel}</span>`
+    : `<span class="chip-edad ahorro">${temp ? "🎉 " + temp.nombre : "5 cajones"}</span>`;
+  const sub = p.tipo === "cajon" ? `${TEMAS[n.tema].emoji} ${TEMAS[n.tema].nombre} · ${n.etapa} · ${n.actividades.length} actividades`
+    : p.tipo === "recarga" ? `Material que se gasta · para el Nivel ${n.nivel} (${n.edad} años)`
+    : "Los 5 niveles · 2 a 6 años · 24 actividades";
   const precio = p.precioLista ? `<s>${dinero(p.precioLista)}</s> ${dinero(p.precio)}` : dinero(p.precio);
-  return `<article class="card-prod">
+  return `<article class="card-prod ${p.tipo}">
     <button class="btn-fav ${fav ? "on" : ""}" data-fav="${p.id}" aria-pressed="${fav}" aria-label="${fav ? "Quitar de" : "Agregar a"} favoritos: ${p.titulo}">${iconos.corazon}</button>
     <a href="producto.html?id=${p.id}" class="cp-media ${n ? "" : "foto"}" style="${n ? `--bg:${n.color}22` : ""}">${arte}</a>
     <div class="cp-info">
@@ -112,6 +114,67 @@ function tarjetaProducto(p) {
       <button class="btn btn-primario btn-bloque" data-add="${p.id}">Agregar al carrito</button>
     </div>
   </article>`;
+}
+
+/* ---------- Club Milu (correo → cupón de bienvenida) ---------- */
+const club = {
+  suscrito() { return store.get("club", null); },
+  suscribir(email) { store.set("club", { email: email.trim().toLowerCase(), fecha: Date.now() }); },
+  cuponUsado() { const u = auth.usuario(); return u ? !!u.cuponUsado : store.get("cupon_usado", false); },
+  marcarUsado() { const u = auth.usuario(); if (u) { u.cuponUsado = true; auth.guardar(u); } store.set("cupon_usado", true); }
+};
+function formClub(extra = "") {
+  const s = club.suscrito();
+  if (s) return `<div class="club-ok ${extra}">⭐ Ya eres del Club Milu. Tu código de primera compra: <b class="codigo">${PROMOS.cupon.codigo}</b>${club.cuponUsado() ? " <small>(ya lo usaste)</small>" : ""}</div>`;
+  return `<form class="form-club ${extra}" data-club>
+    <label for="club-${extra || "f"}" class="sr">Tu correo</label>
+    <input id="club-${extra || "f"}" type="email" name="email" required placeholder="tu@correo.com" autocomplete="email">
+    <button class="btn btn-rosa">Quiero mi 10%</button>
+  </form>`;
+}
+document.addEventListener("submit", e => {
+  const f = e.target.closest("[data-club]"); if (!f) return;
+  e.preventDefault();
+  club.suscribir(new FormData(f).get("email"));
+  sonido.efecto("brillo");
+  $$("[data-club]").forEach(x => x.outerHTML = formClub(x.classList.contains("grande") ? "grande" : ""));
+  toast(`¡Bienvenida al Club Milu! Tu código: ${PROMOS.cupon.codigo}`);
+});
+
+/* ---------- Cálculo del carrito con promociones ---------- */
+function cotizar(items, cuponPedido) {
+  const P = PROMOS, lin = [];
+  let lista = 0, cajonesQty = 0, cajonesLista = 0, torres = 0;
+  items.forEach(x => { const p = getProducto(x.id); if (!p) return; lista += p.precio * x.cant;
+    if (p.tipo === "cajon") { cajonesQty += x.cant; cajonesLista += p.precio * x.cant; }
+    if (p.tipo === "torre") torres += x.cant; });
+  const t = getProducto("torre");
+  const pctEsc = cajonesQty >= 4 ? P.escalera[4] : (P.escalera[cajonesQty] || 0);
+  let promos = [];
+  if (pctEsc) promos.push({ txt: `${cajonesQty} cajones: −${Math.round(pctEsc * 100)} %`, monto: Math.round(cajonesLista * pctEsc) });
+  if (torres > 1) promos.push({ txt: `${torres - 1 > 1 ? "Torres extra" : "2ª torre"}: −${Math.round(P.segundaTorrePct * 100)} %`, monto: Math.round(t.precio * P.segundaTorrePct) * (torres - 1) });
+  const descPromos = promos.reduce((a, b) => a + b.monto, 0);
+  let cuponNota = "", usaCupon = false;
+  if (cuponPedido) {
+    if (cuponPedido.toUpperCase() !== P.cupon.codigo) cuponNota = "Ese código no existe.";
+    else if (club.cuponUsado()) cuponNota = "Este código ya se usó (es válido una sola vez).";
+    else {
+      const descCupon = Math.round(lista * P.cupon.pct);
+      if (descCupon > descPromos) { promos = [{ txt: `Código ${P.cupon.codigo}: −10 %`, monto: descCupon }]; usaCupon = true; cuponNota = "¡Código aplicado!"; }
+      else cuponNota = "Tu carrito ya tiene un descuento mayor; guarda tu código para otra compra.";
+    }
+  }
+  const desc = promos.reduce((a, b) => a + b.monto, 0);
+  const productos = lista - desc;
+  const envio = !items.length ? 0 : productos >= P.envioGratisDesde ? 0 : P.costoEnvio;
+  // Regalo "Completa tu torre": con este cajón completas los 5 niveles
+  const u = auth.usuario(), tiene = new Set();
+  if (u) u.pedidos.forEach(o => o.items.forEach(i => { const p = getProducto(i.id); if (p && p.tipo === "cajon") tiene.add(p.nivel); if (p && p.tipo === "torre") tiene.add("torre"); }));
+  const previos = tiene.size;
+  items.forEach(i => { const p = getProducto(i.id); if (p && p.tipo === "cajon") tiene.add(p.nivel); });
+  const regalo = u && previos > 0 && !tiene.has("torre") && [1, 2, 3, 4, 5].every(n => tiene.has(n)) && cajonesQty > 0;
+  return { lista, promos, desc, productos, envio, total: productos + envio, cajonesQty, torres, pctEsc,
+           faltaEnvio: Math.max(0, P.envioGratisDesde - productos), usaCupon, cuponNota, regalo };
 }
 
 /* Delegación global para ♥ y carrito */
@@ -186,7 +249,7 @@ function header() {
   const niveles = NIVELES.map(n => `<li><a href="producto.html?id=${n.id}">Nivel ${n.nivel} · ${n.nombre}</a></li>`).join("");
   return `
   <a class="saltar" href="#contenido">Saltar al contenido</a>
-  <div class="barra-aviso">Envíos a todo México · Al comprar tu cajón desbloqueas su nivel en la app</div>
+  <div class="barra-aviso">🚚 Envío gratis desde ${dinero(PROMOS.envioGratisDesde)} · ⭐ 10 % en tu primera compra al unirte al <a href="promociones.html#club">Club Milu</a>${temporadaActiva() ? ` · 🎉 ${temporadaActiva().nombre}: torre a ${dinero(temporadaActiva().precioTorre)}` : ""}</div>
   <header class="header">
     <div class="h-fila contenedor">
       <button class="h-menu" aria-label="Abrir menú" aria-expanded="false">${iconos.menu}</button>
@@ -201,6 +264,7 @@ function header() {
               <a class="mega-torre" href="producto.html?id=torre"><img src="img/producto/torre.jpg" alt=""><span><b>Torre completa</b>Los 5 cajones · ${dinero(PRECIO_TORRE)}</span></a>
             </div>
           </li>
+          <li><a class="nav-btn" href="promociones.html">Promociones</a></li>
           <li><a class="nav-btn" href="actividades.html">Actividades y guías</a></li>
           <li><a class="nav-btn" href="seguridad.html">Seguridad digital</a></li>
           <li><a class="nav-btn" href="index.html#app">La app</a></li>
@@ -225,13 +289,16 @@ function footer() {
   return `
   <footer class="footer">
     <div class="contenedor f-grid">
-      <div class="f-marca">${LOGO}<p>Juego físico + app para iPad para niñas y niños de 2 a 6 años. Aprender jugando, juntos.</p></div>
+      <div class="f-marca">${LOGO}<p>Juego físico + app para iPad para niñas y niños de 2 a 6 años. Aprender jugando, juntos.</p>
+        <h4 id="club-pie">Club Milu: 10 % en tu primera compra</h4>${formClub()}</div>
       <div><h4>Comprar</h4><ul>
         <li><a href="tienda.html">Todos los cajones</a></li>
         <li><a href="tienda.html?tema=espacio">Espacio</a></li>
         <li><a href="tienda.html?tema=oceano">Océano</a></li>
         <li><a href="tienda.html?tema=bosque">Bosque</a></li>
-        <li><a href="producto.html?id=torre">Torre completa</a></li></ul></div>
+        <li><a href="producto.html?id=torre">Torre completa</a></li>
+        <li><a href="tienda.html?tipo=recarga">Kits de recarga</a></li>
+        <li><a href="promociones.html">Promociones</a></li></ul></div>
       <div><h4>Para familias</h4><ul>
         <li><a href="actividades.html">Actividades y guías</a></li>
         <li><a href="seguridad.html">Seguridad digital</a></li>

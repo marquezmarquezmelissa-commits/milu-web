@@ -80,11 +80,12 @@ const paginas = {
 
   /* ---------- TIENDA ---------- */
   tienda() {
-    const f = { edad: params.get("edad"), tema: params.get("tema"), nivel: params.get("nivel"), q: params.get("q") || "" };
+    const f = { tipo: params.get("tipo"), edad: params.get("edad"), tema: params.get("tema"), nivel: params.get("nivel"), q: params.get("q") || "" };
     const grupo = (id, items, key) => {
       $(id).innerHTML = items.map(([v, l]) => `<button class="filtro ${f[key] == v ? "on" : ""}" data-k="${key}" data-v="${v}" aria-pressed="${f[key] == v}">${l}</button>`).join("");
     };
     const pintarFiltros = () => {
+      grupo("#f-tipo", [["cajon", "Cajones"], ["torre", "Torre"], ["recarga", "Kits de recarga"]], "tipo");
       grupo("#f-edad", NIVELES.map(n => [n.edad, `${n.edad} años`]), "edad");
       grupo("#f-tema", Object.entries(TEMAS).map(([k, t]) => [k, `${t.emoji} ${t.nombre}`]), "tema");
       grupo("#f-nivel", NIVELES.map(n => [n.nivel, `Nivel ${n.nivel}`]), "nivel");
@@ -92,8 +93,9 @@ const paginas = {
     const pintar = () => {
       const q = f.q.toLowerCase();
       let l = PRODUCTOS.filter(p => {
+        if (f.tipo && p.tipo !== f.tipo) return false;
         if (p.tipo === "torre") return !f.edad && !f.tema && !f.nivel;
-        const n = getNivel(p.id);
+        const n = nivelDe(p);
         if (f.edad && n.edad != f.edad) return false;
         if (f.tema && n.tema !== f.tema) return false;
         if (f.nivel && n.nivel != f.nivel) return false;
@@ -101,12 +103,12 @@ const paginas = {
         return true;
       });
       if (q) l = l.filter(p => p.tipo !== "torre" || "torre completa".includes(q));
-      $("#resultados").innerHTML = l.length ? l.map(tarjetaProducto).join("") : `<p class="vacio">No hay cajones con esos filtros. <button class="link" id="limpiar2">Quitar filtros</button></p>`;
+      $("#resultados").innerHTML = l.length ? l.map(tarjetaProducto).join("") : `<p class="vacio">No hay productos con esos filtros. <button class="link" id="limpiar2">Quitar filtros</button></p>`;
       $("#conteo").textContent = `${l.length} ${l.length === 1 ? "producto" : "productos"}`;
       $("#q-tienda").value = f.q;
       const lim = $("#limpiar2"); if (lim) lim.onclick = limpiar;
     };
-    const limpiar = () => { f.edad = f.tema = f.nivel = null; f.q = ""; history.replaceState(null, "", "tienda.html"); pintarFiltros(); pintar(); };
+    const limpiar = () => { f.tipo = f.edad = f.tema = f.nivel = null; f.q = ""; history.replaceState(null, "", "tienda.html"); pintarFiltros(); pintar(); };
     document.addEventListener("click", e => {
       const b = e.target.closest(".filtro"); if (!b) return;
       f[b.dataset.k] = f[b.dataset.k] == b.dataset.v ? null : b.dataset.v;
@@ -122,19 +124,24 @@ const paginas = {
   /* ---------- PRODUCTO ---------- */
   producto() {
     const p = getProducto(params.get("id")) || PRODUCTOS[0];
+    if (p.tipo === "recarga") return paginas.productoRecarga(p);
     const n = p.tipo === "cajon" ? getNivel(p.id) : null;
+    const temp = p.tipo === "torre" ? temporadaActiva() : null;
     document.title = `${p.titulo} | Milu & Me`;
+    const promoBox = n
+      ? `<div class="promo-box"><b>Entre más cajones, más ahorras</b><span>2 cajones −5 % · 3 cajones −8 % · 4 cajones −10 %</span><a href="promociones.html">Ver promociones</a></div>`
+      : `<div class="promo-box"><b>${temp ? `🎉 Precio de ${temp.nombre}` : "¿Son hermanos?"}</b><span>${temp ? "Solo por unos días." : `La 2ª torre tiene 10 % menos (2 torres: ${dinero(t2Torres())}).`}</span><a href="promociones.html#familias">Ver promociones</a></div>`;
     const fav = favs.tiene(p.id);
     const media = n
       ? `<div class="pd-media" style="--bg:${n.color}33">${arteCajon(n, "grande")}</div>`
       : `<div class="pd-media foto"><img src="img/producto/torre.jpg" alt="Torre Milu & Me con los 5 cajones apilados en rosa, amarillo, azul, crema y azul pizarra"></div>`;
-    const incluye = n ? [...n.incluye, ...INCLUYE_SIEMPRE] : ["Los 5 cajones completos (niveles 1 al 5)", "Base con peso, placa superior y tubo central", "Las 5 piezas del cohete de Milu", "Acceso a los 5 niveles en la app para iPad"];
+    const incluye = n ? [...n.incluye, ...INCLUYE_SIEMPRE] : ["Los 5 cajones completos (niveles 1 al 5)", "Base con peso, tapa (placa superior) y tubo central", "Las 5 piezas del cohete de Milu", "Acceso a los 5 niveles en la app para iPad"];
     $("#producto").innerHTML = `
       <nav class="migas" aria-label="Ruta"><a href="index.html">Inicio</a> › <a href="tienda.html">Tienda</a> › <span>${p.titulo}</span></nav>
       <div class="pd-grid">
         ${media}
         <div class="pd-info">
-          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">5 cajones</span>`}
+          ${n ? `<span class="chip-edad" style="--c:${n.color};--t:${n.texto}">${n.edad}+ años · ${n.etapa}</span>` : `<span class="chip-edad ahorro">${temp ? "🎉 " + temp.nombre : "5 cajones"}</span>`}
           <h1>${p.titulo}</h1>
           <p class="pd-tema">${n ? `${TEMAS[n.tema].emoji} Mundo ${TEMAS[n.tema].nombre} · ${n.actividades.length} actividades` : "2 a 6 años · 24 actividades"}</p>
           <p class="pd-precio">${p.precioLista ? `<s>${dinero(p.precioLista)}</s> ` : ""}${dinero(p.precio)}</p>
@@ -144,7 +151,8 @@ const paginas = {
             <button class="btn btn-primario" id="pd-add">Agregar al carrito</button>
             <button class="btn-fav grande ${fav ? "on" : ""}" data-fav="${p.id}" aria-pressed="${fav}" aria-label="Favoritos">${iconos.corazon}</button>
           </div>
-          <ul class="pd-ventajas"><li>🚚 Envío a todo México</li><li>📱 Desbloquea ${n ? "su nivel" : "los 5 niveles"} en la app</li><li>🖨️ Plantillas imprimibles con tu cuenta</li></ul>
+          ${promoBox}
+          <ul class="pd-ventajas"><li>🚚 Envío gratis desde ${dinero(PROMOS.envioGratisDesde)}</li><li>📱 Desbloquea ${n ? "su nivel" : "los 5 niveles"} en la app</li><li>🖨️ Plantillas imprimibles con tu cuenta</li></ul>
           ${n ? `<p class="aviso-seguridad">⚠️ Juega siempre con un adulto. Contiene piezas pequeñas.</p>` : ""}
         </div>
       </div>
@@ -158,6 +166,47 @@ const paginas = {
     $$(".cantidad button").forEach(b => b.onclick = () => { const i = $("#cant"); i.value = Math.max(1, (+i.value || 1) + +b.dataset.c); });
     $("#pd-add").onclick = () => carrito.agregar(p.id, Math.max(1, +$("#cant").value || 1));
     $("#relacionados").innerHTML = PRODUCTOS.filter(x => x.id !== p.id).slice(0, 4).map(tarjetaProducto).join("");
+  },
+
+  /* ---------- PRODUCTO: KIT DE RECARGA ---------- */
+  productoRecarga(p) {
+    const n = nivelDe(p), fav = favs.tiene(p.id);
+    document.title = `${p.titulo} | Milu & Me`;
+    $("#producto").innerHTML = `
+      <nav class="migas" aria-label="Ruta"><a href="index.html">Inicio</a> › <a href="tienda.html?tipo=recarga">Kits de recarga</a> › <span>${p.titulo}</span></nav>
+      <div class="pd-grid">
+        <div class="pd-media" style="--bg:${n.color}33">${arteCajon(n, "grande recarga")}</div>
+        <div class="pd-info">
+          <span class="chip-edad chip-recarga">Recarga · Nivel ${n.nivel}</span>
+          <h1>${p.titulo}</h1>
+          <p class="pd-tema">Para el cajón «${n.nombre}» · ${n.edad} años</p>
+          <p class="pd-precio">${dinero(p.precio)}</p>
+          <p>¿Se acabó la plastilina o las hojas? Con este kit tu peque vuelve a jugar su nivel completo. Ideal si juegan dos hermanos.</p>
+          <div class="pd-comprar">
+            <div class="cantidad"><button aria-label="Menos" data-c="-1">−</button><input id="cant" type="number" min="1" value="1" aria-label="Cantidad"><button aria-label="Más" data-c="1">+</button></div>
+            <button class="btn btn-primario" id="pd-add">Agregar al carrito</button>
+            <button class="btn-fav grande ${fav ? "on" : ""}" data-fav="${p.id}" aria-pressed="${fav}" aria-label="Favoritos">${iconos.corazon}</button>
+          </div>
+          <p class="ayuda">No incluye el cajón. Las plantillas también las puedes imprimir gratis desde <a href="actividades.html?nivel=${n.nivel}">Actividades y guías</a>.</p>
+        </div>
+      </div>
+      <div class="pd-detalle"><section><h2>Qué incluye</h2><ul class="lista-check">${RECARGA_INCLUYE[n.nivel].map(i => `<li>${i}</li>`).join("")}</ul></section></div>`;
+    $$(".cantidad button").forEach(b => b.onclick = () => { const i = $("#cant"); i.value = Math.max(1, (+i.value || 1) + +b.dataset.c); });
+    $("#pd-add").onclick = () => carrito.agregar(p.id, Math.max(1, +$("#cant").value || 1));
+    $("#relacionados").innerHTML = [getProducto(n.id), ...PRODUCTOS.filter(x => x.tipo === "recarga" && x.id !== p.id).slice(0, 3)].map(tarjetaProducto).join("");
+  },
+
+  /* ---------- PROMOCIONES ---------- */
+  promociones() {
+    const t = getProducto("torre"), c = PRECIOS[1];
+    $("#club-promo").innerHTML = formClub("grande");
+    $("#tabla-escalera").innerHTML = [1, 2, 3, 4].map(q => { const pct = q >= 4 ? PROMOS.escalera[4] : (PROMOS.escalera[q] || 0), tot = Math.round(c * q * (1 - pct));
+      return `<tr><td>${q} ${q === 1 ? "cajón" : "cajones"}</td><td>${pct ? `−${Math.round(pct * 100)} %` : "—"}</td><td>${dinero(tot)}</td><td>${dinero(Math.round(tot / q))}</td></tr>`; }).join("") +
+      `<tr class="destacada"><td>⭐ Torre (5 cajones + base y estructura)</td><td>Mejor precio</td><td>${dinero(PRECIO_TORRE)}</td><td>${dinero(PRECIO_TORRE / 5)}</td></tr>`;
+    $("#temporadas").innerHTML = PROMOS.temporadas.map(x => { const [m1, d1] = x.desde.split("-"), [m2, d2] = x.hasta.split("-"), mes = m => ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"][+m - 1];
+      return `<li><b>${x.nombre}</b><span>${+d1} ${mes(m1)} – ${+d2} ${mes(m2)}</span><span class="tp-mini">Torre a ${dinero(x.precioTorre)}</span></li>`; }).join("");
+    $("#dos-torres").textContent = dinero(t2Torres());
+    $("#dos-cajones").textContent = dinero(Math.round(c * 2 * (1 - PROMOS.escalera[2])));
   },
 
   /* ---------- ACTIVIDADES Y GUÍAS ---------- */
@@ -257,35 +306,48 @@ const paginas = {
 
   /* ---------- CARRITO ---------- */
   carrito() {
+    let cupon = sessionStorage.getItem("milu_cupon") || "";
     const pintar = () => {
       const it = carrito.items();
       if (!it.length) {
         $("#carrito").innerHTML = `<div class="vacio"><p>Tu carrito está vacío.</p><a class="btn btn-primario" href="tienda.html">Encuentra tu cajón</a></div>`;
         return;
       }
-      // Sugerencia: si tiene los 5 cajones sueltos, conviene la torre
-      const sueltos = NIVELES.filter(n => it.some(x => x.id === n.id)).length;
-      const t = getProducto("torre");
-      const sugerencia = sueltos >= 3 && !it.some(x => x.id === "torre")
-        ? `<div class="sugerencia">💡 Llevas ${sueltos} cajones. Con la <b>torre completa</b> tienes los 5 niveles en una torre modular por ${dinero(t.precio)}. <a href="producto.html?id=torre">Ver torre</a></div>` : "";
+      const q = cotizar(it, cupon), t = getProducto("torre");
+      const avisos = [];
+      if (q.regalo) avisos.push(`🎁 <b>¡Completas tu torre!</b> Con esta compra tienes los 5 niveles: la base, la estructura y la tapa de la torre van de regalo.`);
+      if (q.cajonesQty === 4 && !q.torres) avisos.push(`🚀 <b>¡Por solo ${dinero(t.precio - (q.lista - q.desc - (q.lista - cajonesLista(it))))} más llévate la torre completa con base y estructura!</b> <button class="btn btn-rosa btn-chico" data-a-torre>Cambiar a la torre</button>`);
+      else if (q.cajonesQty >= 5 && !q.torres) avisos.push(`🚀 Con 5 cajones te conviene la <b>torre completa</b>: ${dinero(t.precio)} con base y estructura. <button class="btn btn-rosa btn-chico" data-a-torre>Cambiar a la torre</button>`);
+      else if (q.cajonesQty >= 1 && q.cajonesQty <= 3) { const sig = q.cajonesQty + 1, pct = sig >= 4 ? PROMOS.escalera[4] : PROMOS.escalera[sig]; avisos.push(`💡 Agrega 1 cajón más y ahorra <b>${Math.round(pct * 100)} %</b> en tus cajones. <a href="tienda.html?tipo=cajon">Ver cajones</a>`); }
+      const envioTxt = q.envio ? dinero(q.envio) : "Gratis";
+      const barra = q.faltaEnvio > 0 ? `<div class="envio-barra"><span>Te faltan <b>${dinero(q.faltaEnvio)}</b> para el envío gratis</span><i style="width:${Math.min(100, 100 - q.faltaEnvio / PROMOS.envioGratisDesde * 100)}%"></i></div>`
+                                     : `<div class="envio-barra ok"><span>🚚 ¡Tienes envío gratis!</span><i style="width:100%"></i></div>`;
       $("#carrito").innerHTML = `
-        ${sugerencia}
+        ${avisos.map(a => `<div class="sugerencia">${a}</div>`).join("")}
         <div class="cart-grid">
           <ul class="cart-lista">${it.map(x => {
-            const p = getProducto(x.id), n = getNivel(x.id);
+            const p = getProducto(x.id), n = nivelDe(p);
             return `<li class="cart-item">
               <div class="ci-media">${n ? arteCajon(n, "mini") : `<img src="img/producto/torre.jpg" alt="">`}</div>
               <div class="ci-info"><a href="producto.html?id=${p.id}"><b>${p.titulo}</b></a><span>${dinero(p.precio)}</span>
                 <button class="link" data-quitar="${p.id}">Quitar</button></div>
               <div class="cantidad"><button data-menos="${p.id}" aria-label="Menos">−</button><input value="${x.cant}" readonly aria-label="Cantidad"><button data-mas="${p.id}" aria-label="Más">+</button></div>
               <b class="ci-total">${dinero(p.precio * x.cant)}</b>
-            </li>`; }).join("")}</ul>
+            </li>`; }).join("")}
+            ${q.regalo ? `<li class="cart-item regalo"><div class="ci-media"><img src="img/marca/cohete-armable.png" alt=""></div><div class="ci-info"><b>Base, estructura y tapa de la torre</b><span>Regalo por completar los 5 niveles</span></div><div></div><b class="ci-total">Gratis</b></li>` : ""}</ul>
           <aside class="resumen">
             <h2>Resumen</h2>
-            <p><span>Subtotal</span><b>${dinero(carrito.total())}</b></p>
-            <p><span>Envío</span><b>Se calcula al confirmar</b></p>
-            <p class="r-total"><span>Total</span><b>${dinero(carrito.total())}</b></p>
+            ${barra}
+            <p><span>Subtotal</span><b>${dinero(q.lista)}</b></p>
+            ${q.promos.map(d => `<p class="r-desc"><span>${d.txt}</span><b>−${dinero(d.monto)}</b></p>`).join("")}
+            <p><span>Envío</span><b>${envioTxt}</b></p>
+            <p class="r-total"><span>Total</span><b>${dinero(q.total)}</b></p>
             <small>Precios con IVA incluido.</small>
+            <form id="f-cupon" class="f-cupon">
+              <label for="cupon">¿Tienes un código?</label>
+              <div class="dos-col"><input id="cupon" name="cupon" value="${cupon}" placeholder="BIENVENIDA10" autocomplete="off"><button class="btn btn-sec btn-chico">Aplicar</button></div>
+              ${q.cuponNota ? `<p class="${q.usaCupon ? "ok" : "error"}">${q.cuponNota}</p>` : club.suscrito() ? "" : `<p class="ayuda">¿Aún no tienes uno? <a href="promociones.html#club">Únete al Club Milu</a> y recibe 10 % en tu primera compra.</p>`}
+            </form>
             <form id="f-pago" class="form-pago">
               <h3>Datos de envío</h3>
               <label>Nombre completo<input name="nombre" required autocomplete="name"></label>
@@ -293,13 +355,17 @@ const paginas = {
               <div class="dos"><label>C.P.<input name="cp" required inputmode="numeric" pattern="[0-9]{5}" autocomplete="postal-code"></label>
               <label>Teléfono<input name="tel" required inputmode="tel" autocomplete="tel"></label></div>
               <p class="nota-proto">Pago simulado: en la versión final aquí se conecta la pasarela de pago (tarjeta, OXXO o transferencia).</p>
-              <button class="btn btn-primario btn-bloque">Confirmar pedido</button>
+              <button class="btn btn-primario btn-bloque">Confirmar pedido · ${dinero(q.total)}</button>
             </form>
           </aside>
         </div>`;
     };
     $("#carrito").addEventListener("click", e => {
       const b = e.target.closest("button"); if (!b) return;
+      if (b.hasAttribute("data-a-torre")) {
+        carrito.guardar(carrito.items().filter(x => getProducto(x.id).tipo !== "cajon"));
+        carrito.agregar("torre"); pintar(); return;
+      }
       const cant = id => carrito.items().find(x => x.id === id).cant;
       if (b.dataset.quitar) carrito.quitar(b.dataset.quitar);
       if (b.dataset.mas) carrito.cambiar(b.dataset.mas, cant(b.dataset.mas) + 1);
@@ -308,12 +374,18 @@ const paginas = {
     });
     $("#carrito").addEventListener("submit", e => {
       e.preventDefault();
+      if (e.target.id === "f-cupon") { cupon = $("#cupon").value.trim().toUpperCase(); try { sessionStorage.setItem("milu_cupon", cupon); } catch {} pintar(); return; }
+      const q = cotizar(carrito.items(), cupon);
       const folio = "MM-" + Date.now().toString().slice(-6);
       const u = auth.usuario();
-      if (u) { u.pedidos.unshift({ folio, fecha: Date.now(), total: carrito.total(), items: carrito.items() }); auth.guardar(u); }
+      if (q.usaCupon) { club.marcarUsado(); try { sessionStorage.removeItem("milu_cupon"); } catch {} }
+      if (u) { u.pedidos.unshift({ folio, fecha: Date.now(), total: q.total, items: carrito.items(), regalo: q.regalo }); auth.guardar(u); }
       carrito.vaciar(); sonido.efecto("aplausos");
-      $("#carrito").innerHTML = `<div class="vacio exito"><h2>¡Gracias por tu compra! 🚀</h2><p>Tu pedido <b>${folio}</b> quedó registrado. ${u ? "Lo puedes ver en tu cuenta." : "Crea una cuenta para descargar las plantillas de tus cajones."}</p><a class="btn btn-primario" href="actividades.html">Ver actividades y guías</a></div>`;
+      $("#carrito").innerHTML = `<div class="vacio exito"><h2>¡Gracias por tu compra! 🚀</h2><p>Tu pedido <b>${folio}</b> por <b>${dinero(q.total)}</b> quedó registrado.${q.regalo ? " 🎁 Incluye la base, estructura y tapa de tu torre de regalo." : ""} ${u ? "Lo puedes ver en tu cuenta." : "Crea una cuenta para descargar las plantillas de tus cajones."}</p><a class="btn btn-primario" href="actividades.html">Ver actividades y guías</a></div>`;
     });
     pintar();
   }
 };
+
+function cajonesLista(items) { return items.reduce((a, x) => { const p = getProducto(x.id); return a + (p && p.tipo === "cajon" ? p.precio * x.cant : 0); }, 0); }
+function t2Torres() { const t = getProducto("torre"); return t.precio + Math.round(t.precio * (1 - PROMOS.segundaTorrePct)); }

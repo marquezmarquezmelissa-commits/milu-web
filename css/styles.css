@@ -439,3 +439,53 @@ details p { margin: 10px 0 0; }
 .tema-img .a0 { bottom: -26px; }
 .burbuja.b1 { top: 46%; left: -34px; }
 .hero-milu { top: -2%; left: -50px; }
+
+/* ---------- Promociones ---------- */
+.barra-aviso a { color: var(--cielo); font-weight: 800; }
+.promo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.promo-card { background: var(--c); color: var(--t, var(--pizarra)); border-radius: 26px; padding: 26px 22px; text-decoration: none; display: grid; gap: 6px; box-shadow: var(--sombra); transition: transform .2s; border: 2px solid rgba(77,90,113,.12); }
+.promo-card:hover { transform: translateY(-4px); }
+.promo-card b { font-size: 1.7rem; font-weight: 900; line-height: 1.05; }
+.promo-box { display: grid; gap: 2px; background: var(--crema); border: 2px dashed var(--rosa); border-radius: 16px; padding: 12px 16px; margin: 0 0 14px; }
+.promo-box span { color: var(--suave); font-size: .93rem; }
+.promo-box a { font-size: .9rem; font-weight: 700; }
+.chip-recarga { background: var(--crema); color: var(--pizarra); }
+.arte-cajon.recarga .ac-tubo { display: none; }
+.arte-cajon.recarga::after { content: "RECARGA"; position: absolute; left: 50%; bottom: -16px; translate: -50% 0; background: var(--rosa); color: #fff; font-weight: 900; font-size: .72rem; letter-spacing: .06em; padding: 4px 10px; border-radius: 999px; }
+.envio-barra { position: relative; background: #fff; border-radius: 12px; padding: 10px 12px 16px; margin-bottom: 14px; font-size: .92rem; overflow: hidden; }
+.envio-barra i { position: absolute; left: 0; bottom: 0; height: 6px; background: var(--rosa); border-radius: 0 6px 6px 0; }
+.envio-barra.ok i { background: var(--cielo); }
+.r-desc { color: #b03a74; font-weight: 700; }
+.f-cupon { display: grid; gap: 6px; margin-top: 16px; padding-top: 14px; border-top: 2px solid var(--borde); }
+.f-cupon label { font-size: .9rem; }
+.dos-col { display: flex; gap: 8px; }
+.dos-col input { flex: 1; text-transform: uppercase; }
+.f-cupon p { margin: 0; font-size: .88rem; }
+.f-cupon .ok { color: #2f7a56; font-weight: 700; }
+.form-club { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.form-club input { flex: 1 1 180px; min-width: 0; }
+.form-club.grande input { font-size: 1.05rem; }
+.club-ok { background: rgba(255,248,232,.12); border-radius: 14px; padding: 10px 14px; margin-top: 10px; font-size: .95rem; }
+.promos .club-ok { background: var(--crema); }
+.codigo { background: var(--rosa); color: #fff; padding: 2px 10px; border-radius: 8px; letter-spacing: .05em; }
+.footer .f-marca h4 { margin: 22px 0 0; }
+.promos { padding: 36px 0 64px; display: grid; gap: 22px; }
+.promo-sec { background: #fff; border: 2px solid var(--borde); border-radius: 28px; padding: 30px; scroll-margin-top: 110px; }
+.promo-sec h2 { font-size: 1.7rem; }
+.club-sec, .temporada-milu { display: grid; grid-template-columns: 150px 1fr; gap: 26px; align-items: center; }
+.club-sec { background: var(--crema); }
+.temporada-milu { background: var(--cielo); }
+.promo-img { width: 100%; filter: drop-shadow(0 8px 10px rgba(77,90,113,.2)); }
+.tabla-promo .destacada td { background: #fde6f1; font-weight: 800; }
+.temporadas { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.temporadas li { background: var(--crema); border-radius: 18px; padding: 16px; display: grid; gap: 2px; }
+.tp-mini { font-weight: 800; color: #b03a74; }
+.cart-item.regalo { border-style: dashed; border-color: var(--rosa); background: #fff7fb; }
+.cart-item.regalo .ci-media { background: var(--cielo); }
+.cart-item.regalo .ci-media img { object-fit: contain; padding: 8px; }
+@media (max-width: 900px) { .promo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .temporadas { grid-template-columns: 1fr; } .club-sec, .temporada-milu { grid-template-columns: 1fr; } .promo-img { width: 120px; } }
+.cart-grid > *, .resumen > *, .resumen form { min-width: 0; }
+.resumen input, .form-pago input { width: 100%; }
+.dos-col input { min-width: 0; width: auto; }
+.nav-btn { white-space: nowrap; }
+@media (max-width: 1320px) { .buscador { display: none; } .h-nombre { display: none; } }
