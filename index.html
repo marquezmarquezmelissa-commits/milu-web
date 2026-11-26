@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milu & Me | Juego físico + app para iPad, de 2 a 6 años</title>
+  <meta name="description" content="Cajones de actividades para niñas y niños de 2 a 6 años que se complementan con una app para iPad.">
+  <link rel="icon" href="img/marca/logo-insignia.png">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-pagina="inicio">
+  <!-- El header y el footer se insertan desde js/app.js -->
+  <main id="contenido">
+
+    <section class="hero">
+      <div class="contenedor hero-grid">
+        <div>
+          <span class="eyebrow" style="color:var(--pizarra)">Juego físico + app para iPad</span>
+          <h1>Aprende jugando <span>con las manos</span>, juntos.</h1>
+          <p>Cada cajón es un set de actividades para una edad. La app de Milu lo acompaña con videos, música y recompensas, siempre con un adulto al lado.</p>
+          <div class="hero-botones">
+            <a class="btn btn-primario" href="#encuentra">Encuentra tu cajón</a>
+            <a class="btn btn-sec" href="seguridad.html">Cómo cuidamos la pantalla</a>
+          </div>
+        </div>
+        <div class="hero-img">
+          <img class="hero-foto" src="img/producto/torre.jpg" alt="Torre Milu &amp; Me con cinco cajones de colores apilados">
+          <span class="burbuja b1">5 niveles · 2 a 6 años</span>
+          <span class="burbuja b2">¡Arma el cohete de Milu!</span>
+          <img class="estrella-img" src="img/marca/estrella.png" alt="" style="top:-14px;right:18%">
+          <img class="estrella-img" src="img/marca/estrella.png" alt="" style="width:26px;top:30%;right:-12px;animation-delay:1s">
+          <img class="hero-cohete" src="img/marca/cohete-volador.png" alt="">
+          <img class="hero-milu" src="img/personajes/milu-astronauta.png" alt="Milu, el astronauta">
+          <img class="hero-planeta" src="img/espacio/planeta.png" alt="">
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="contenedor">
+        <div class="seccion-titulo">
+          <span class="eyebrow">Compra por edad</span>
+          <h2>Un cajón para cada etapa</h2>
+          <p>La dificultad sube con la edad. Elige el de tu peque o empieza por el primero.</p>
+        </div>
+        <nav class="bloques" id="bloques-edad" aria-label="Comprar por edad"></nav>
+      </div>
+    </section>
+
+    <section class="seccion-torre" id="encuentra">
+      <div class="contenedor">
+        <div class="seccion-titulo">
+          <span class="eyebrow">Encuentra el set perfecto para cualquier edad</span>
+          <h2>Toca un cajón de la torre</h2>
+          <p>Cada cajón es un nivel. Cómpralo suelto, o llévate los 5 y arma la torre completa.</p>
+        </div>
+        <div class="torre-wrap">
+          <div class="torre-selector" id="torre-selector" role="group" aria-label="Cajones por nivel"></div>
+          <div class="torre-panel" id="torre-panel" aria-live="polite"></div>
+        </div>
+        <div class="torre-cta"><button class="btn btn-amarillo" id="btn-torre"><img src="img/marca/estrella.png" alt=""> Ver la torre completa (5 cajones)</button></div>
+      </div>
+    </section>
+
+    <section>
+      <div class="contenedor">
+        <div class="seccion-titulo">
+          <span class="eyebrow">Compra por tema</span>
+          <h2>Tres mundos para explorar</h2>
+        </div>
+        <div class="temas" id="temas"></div>
+      </div>
+    </section>
+
+    <section id="app">
+      <div class="contenedor hibrido">
+        <div>
+          <span class="eyebrow">Cómo funciona</span>
+          <h2>El juego es físico. La app solo acompaña.</h2>
+          <ol class="pasos">
+            <li><b>Abre tu cajón</b> y escanea la tarjeta QR de la actividad.</li>
+            <li><b>Milu te enseña</b> en un video corto qué hacer.</li>
+            <li><b>¡A jugar con las manos!</b> La pantalla espera tranquila.</li>
+            <li><b>Celebra y guarda</b> las piezas. Ganas estrellas y premios para Milu.</li>
+          </ol>
+          <span class="proximamente">📱 App para iPad · Próximamente en App Store</span>
+        </div>
+        <div class="ipad" aria-hidden="true">
+          <div class="ipad-pantalla">
+            <video src="video/intro-logo.mp4" autoplay muted loop playsinline poster="img/fondos/espacio.jpg"></video>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="contenedor">
+        <div class="seccion-titulo"><span class="eyebrow">Todos los productos</span><h2>Cajones y torre</h2></div>
+        <div class="grid-prod" id="destacados"></div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="contenedor info-grid">
+        <a class="info" href="actividades.html"><span class="ico">🖨️</span><h3>Actividades y guías</h3><p>Descarga en PDF las plantillas de tu cajón y reimprímelas cuantas veces quieras.</p></a>
+        <a class="info" href="seguridad.html" style="background:var(--cielo)"><span class="ico">🔒</span><h3>Seguridad digital</h3><p>PIN para papás, temporizador y cero anuncios. Así cuidamos el tiempo de pantalla.</p></a>
+        <a class="info info-cohete" href="producto.html?id=torre" style="background:var(--rosa);color:#fff"><img src="img/marca/cohete-armable.png" alt=""><span class="ico">🚀</span><h3>Arma el cohete</h3><p>Cada cajón trae una pieza del cohete de Milu. Con los 5 lo completas.</p></a>
+      </div>
+    </section>
+  </main>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pages.js"></script>
+</body>
+</html>
