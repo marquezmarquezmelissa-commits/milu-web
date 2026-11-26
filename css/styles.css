@@ -495,3 +495,13 @@ details p { margin: 10px 0 0; }
 .hibrido .hero-botones { align-items: center; margin-top: 18px; }
 .hibrido .proximamente { margin-top: 0; }
 .logo { flex: none; } .logo img { width: auto; }
+
+/* ---------- Pulsera de cuentas (debajo del menú) ---------- */
+.pulsera { position: relative; height: 230px; padding: 0; overflow: hidden; background: linear-gradient(var(--crema) 0 82%, #f3e9d2 82% 100%); border-bottom: 3px solid #eadfc6; }
+.pulsera canvas { display: block; width: 100%; height: 175px; touch-action: pan-y; }
+.pulsera.jalando canvas { cursor: grabbing !important; }
+.milu-camina { position: absolute; left: 0; bottom: 14px; height: 96px; width: auto; pointer-events: none; will-change: transform; filter: drop-shadow(0 4px 2px rgba(77,90,113,.18)); }
+.pulsera-pista { position: absolute; right: 4%; bottom: 18px; background: #fff; color: var(--pizarra); font-weight: 800; font-size: .85rem; padding: 6px 14px; border-radius: 999px; box-shadow: var(--sombra); transition: opacity .4s; }
+.pulsera-pista.oculta { opacity: 0; }
+.pulsera + .hero .hero-grid { padding-top: 40px; }
+@media (max-width: 560px) { .pulsera { height: 200px; } .pulsera canvas { height: 150px; } .milu-camina { height: 78px; } }
