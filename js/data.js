@@ -153,6 +153,10 @@ const nivelDe = p => p && p.nivel ? NIVELES[p.nivel - 1] : null;
 
 /* PDFs descargables (en /descargas). Reemplaza los archivos con los finales, mismo nombre. */
 const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-function pdfActividad(nivel, i, titulo) { return `descargas/nivel-${nivel}/${i + 1}-${slug(titulo)}.pdf`; }
+/* Actividades que tienen plantilla imprimible (índice = actividad - 1). Las demás se juegan con el material del cajón. */
+const PLANTILLAS = { 1: [0, 2, 3], 2: [0, 1, 2, 3], 3: [1, 2, 3, 4, 5], 4: [0, 1], 5: [0, 1, 2, 3] };
+function pdfActividad(nivel, i, titulo) { return PLANTILLAS[nivel].includes(i) ? `descargas/nivel-${nivel}/${i + 1}-${slug(titulo)}.pdf` : null; }
+const PDF_STICKERS_MILU = "descargas/stickers-milu.pdf";
+const VIDEO_APP = "video/app-milu.mp4";
 function pdfManual(nivel) { return `descargas/nivel-${nivel}/manual-nivel-${nivel}.pdf`; }
 

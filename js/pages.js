@@ -226,14 +226,14 @@ const paginas = {
       cont.innerHTML = `
         <div class="act-cabecera" style="--c:${n.color};--t:${n.texto}">
           <div><h2>Nivel ${n.nivel} · ${n.nombre}</h2><p>${TEMAS[n.tema].emoji} ${TEMAS[n.tema].nombre} · ${n.edad} años · ${n.etapa}</p></div>
-          ${btn(pdfManual(n.nivel), "Manual completo (PDF)")}
+          <div class="act-botones">${btn(pdfManual(n.nivel), "Manual (PDF)")} ${btn(PDF_STICKERS_MILU, "Stickers Milu (PDF)")}</div>
         </div>
         <div class="act-grid">${n.actividades.map((a, i) => `
           <article class="act-card">
             <span class="act-num" style="--c:${n.color};--t:${n.texto}">${i + 1}</span>
             <h3>${a.t}</h3><p>${a.d}</p>
             <div class="act-botones">${n.videos[i] ? `<button class="btn btn-rosa btn-chico" data-video="${n.videos[i]}" data-titulo="${a.t}">▶ Ver video</button>` : ""}
-            ${btn(pdfActividad(n.nivel, i, a.t), "Plantillas PDF")}</div>
+            ${pdfActividad(n.nivel, i, a.t) ? btn(pdfActividad(n.nivel, i, a.t), "Plantillas PDF") : `<span class="sin-plantilla">Se juega con el material del cajón</span>`}</div>
           </article>`).join("")}</div>`;
     };
     tabs.addEventListener("click", e => { const t = e.target.closest(".tab"); if (t) pintar(+t.dataset.n); });
