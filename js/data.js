@@ -4,8 +4,8 @@
    ========================================================= */
 
 /* Precios de venta (MXN) · de "Costos_por_cajon_Milu.pdf" (versión verificada, nov 2026) */
-const PRECIOS = { 1: 1099, 2: 1099, 3: 1099, 4: 1099, 5: 1099 };
-const PRECIO_TORRE = 4699;
+const PRECIOS = { 1: 1250, 2: 1250, 3: 1250, 4: 1250, 5: 1250 };
+const PRECIO_TORRE = 4700;
 const PRECIO_RECARGA_BASE = 199;          // Torre completa (5 cajones) · precio verificado
 
 const TEMAS = {
